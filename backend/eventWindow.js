@@ -1,9 +1,9 @@
 import './loadEnv.js';
 
-const SESSION_DURATION_MS = 3 * 60 * 1000;
+const SESSION_DURATION_MS = 20 * 60 * 1000;
 
-const DEFAULT_START = '2026-06-18T16:00:00+05:30';
-const DEFAULT_END = '2026-06-18T16:15:00+05:30';
+const DEFAULT_START = '2026-07-17T16:00:00+05:30';
+const DEFAULT_END = '2026-07-17T17:00:00+05:30';
 
 function parseEventTime(value, fallback) {
   const ms = Date.parse(value || fallback);

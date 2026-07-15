@@ -40,7 +40,7 @@ function respondAlreadyPlayed(res, row) {
   const player = rowToPlayer(row);
   const score = player.breakdown?.totalScore ?? 0;
   return res.status(403).json({
-    error: `You have already completed the Gamethon (score: ${score}/100). Each employee can play only once.`,
+    error: `You have already completed the Gamethon (score: ${score}/180). Each employee can play only once.`,
     code: 'ALREADY_PLAYED',
     score,
     status: player.status,

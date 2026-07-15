@@ -12,14 +12,11 @@
 <div class="site-bg"></div>
 <header class="site-header">
   <div class="brand">
-    <img class="brand-logo-img" src="/images/bollywood-outdoor-cinema-logo.png" alt="Bollywood Outdoor Cinema" />
+    <div class="gamethon-logo gamethon-logo--header">GAMETHON</div>
     <div class="brand-copy">
-      <div class="brand-title">Indira IVF Gamethon</div>
-      <div class="brand-subtitle">Bollywood Outdoor Cinema</div>
+      <div class="brand-title">Indira IVF</div>
+      <div class="brand-subtitle">Culture Club</div>
     </div>
-  </div>
-  <div class="header-actions">
-    <button class="fs-btn" id="fsBtn" type="button" title="Toggle fullscreen">Fullscreen</button>
   </div>
 </header>
 <main class="game-shell">
@@ -35,9 +32,7 @@
 (function() {
   const app = document.getElementById('app');
   const adminBtn = document.getElementById('adminBtn');
-  const fsBtn = document.getElementById('fsBtn');
   const API_BASE = '/api';
-  const LOGO_URL = '/images/bollywood-outdoor-cinema-logo.png';
   const STICKER_BASE = '/images/stickers/';
   const SECTION_DECO = {
     login: [
@@ -63,103 +58,13 @@
     [{ file: 'dancer-orange.png', pos: 'br', size: 'sm' }, { file: 'bollywood-vibes.png', pos: 'tl', size: 'sm' }],
     [{ file: 'dancer-green.png', pos: 'bl', size: 'sm' }, { file: 'dancer-blue.png', pos: 'tr', size: 'sm' }],
     [{ file: 'dancer-orange.png', pos: 'tr', size: 'sm' }, { file: 'clapperboard.png', pos: 'bl', size: 'xs' }],
+    [{ file: 'dancer-green.png', pos: 'tl', size: 'sm' }, { file: 'love-bollywood-style.png', pos: 'br', size: 'xs' }],
+    [{ file: 'dance-couple.png', pos: 'bl', size: 'sm' }, { file: 'bollywood-vibes.png', pos: 'tr', size: 'sm' }],
+    [{ file: 'clapperboard.png', pos: 'br', size: 'sm' }, { file: 'dancer-blue.png', pos: 'tl', size: 'sm' }],
+    [{ file: 'dancer-orange.png', pos: 'bl', size: 'md' }, { file: 'dancer-green.png', pos: 'tr', size: 'xs' }],
+    [{ file: 'love-bollywood-style.png', pos: 'tl', size: 'sm' }, { file: 'clapperboard.png', pos: 'br', size: 'sm' }],
   ];
   let cachedPlayers = [];
-  let fullscreenLocked = false;
-  let reenterFullscreenTimer = null;
-
-  function isFullscreen() {
-    return !!(document.fullscreenElement || document.webkitFullscreenElement);
-  }
-
-  async function enterFullscreen() {
-    try {
-      if (isFullscreen()) return;
-      const el = document.documentElement;
-      if (el.requestFullscreen) await el.requestFullscreen();
-      else if (el.webkitRequestFullscreen) await el.webkitRequestFullscreen();
-    } catch (e) { /* user denied or unsupported */ }
-  }
-
-  async function exitFullscreen() {
-    try {
-      if (!isFullscreen()) return;
-      if (document.exitFullscreen) await document.exitFullscreen();
-      else if (document.webkitExitFullscreen) await document.webkitExitFullscreen();
-    } catch (e) { /* ignore */ }
-  }
-
-  async function lockEscapeKey() {
-    if (!navigator.keyboard?.lock) return;
-    try {
-      await navigator.keyboard.lock(['Escape']);
-    } catch (e) { /* unsupported or denied */ }
-  }
-
-  function unlockEscapeKey() {
-    if (!navigator.keyboard?.unlock) return;
-    try {
-      navigator.keyboard.unlock();
-    } catch (e) { /* ignore */ }
-  }
-
-  function setFullscreenLock(locked) {
-    fullscreenLocked = locked;
-    document.body.classList.toggle('game-fullscreen-locked', locked);
-    if (!locked) unlockEscapeKey();
-    if (fsBtn) {
-      fsBtn.disabled = locked;
-      fsBtn.hidden = locked;
-      fsBtn.title = locked ? 'Fullscreen locked during gameplay' : 'Toggle fullscreen';
-    }
-  }
-
-  function handleFullscreenChange() {
-    updateFsBtn();
-    if (!fullscreenLocked || !gameState) return;
-    if (!isFullscreen()) {
-      clearTimeout(reenterFullscreenTimer);
-      enterFullscreen();
-      reenterFullscreenTimer = setTimeout(() => {
-        if (fullscreenLocked && gameState && !isFullscreen()) enterFullscreen();
-        if (fullscreenLocked && gameState) lockEscapeKey();
-      }, 50);
-    } else if (fullscreenLocked) {
-      lockEscapeKey();
-    }
-  }
-
-  function blockFullscreenExitKeys(e) {
-    if (!fullscreenLocked || !gameState) return;
-    if (e.key === 'Escape' || e.key === 'F11') {
-      e.preventDefault();
-      e.stopPropagation();
-      e.stopImmediatePropagation();
-      if (!isFullscreen()) enterFullscreen();
-    }
-  }
-
-  async function toggleFullscreen() {
-    if (fullscreenLocked) return;
-    try {
-      if (!isFullscreen()) await enterFullscreen();
-      else await exitFullscreen();
-    } catch (e) { /* user denied or unsupported */ }
-  }
-
-  function updateFsBtn() {
-    if (!fsBtn) return;
-    fsBtn.textContent = isFullscreen() ? 'Exit Fullscreen' : 'Fullscreen';
-  }
-
-  if (fsBtn) {
-    fsBtn.addEventListener('click', toggleFullscreen);
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
-  }
-
-  document.addEventListener('keydown', blockFullscreenExitKeys, true);
-  document.addEventListener('keyup', blockFullscreenExitKeys, true);
 
   async function apiRequest(path, options = {}) {
     const res = await fetch(`${API_BASE}${path}`, {
@@ -229,10 +134,12 @@
     await apiRequest('/players', { method: 'DELETE' });
     cachedPlayers = [];
   }
-  const TOTAL_TIME = 180;
+  const TOTAL_TIME = 20 * 60;
   const POINTS_PER_SECTION = 20;
   const WRONG_PENALTY = 4;
-  const SECTION_IDS = ['spot', 'jumble', 'match', 'guess', 'eye'];
+  const SECTION_IDS = ['spot', 'jumble', 'maze', 'guess', 'runner', 'memory', 'tictactoe', 'bigpuzzle', 'wordsearch'];
+  const GAME_COUNT = SECTION_IDS.length;
+  const MAX_SCORE = GAME_COUNT * POINTS_PER_SECTION;
 
   let currentPlayer = null;
   let gameState = null;
@@ -252,8 +159,8 @@
       eventStatus = await fetchEventStatus();
     } catch {
       if (!eventStatus) {
-        const startAt = Date.parse('2026-06-18T16:00:00+05:30');
-        const endAt = Date.parse('2026-06-18T16:15:00+05:30');
+        const startAt = Date.parse('2026-07-17T16:00:00+05:30');
+        const endAt = Date.parse('2026-07-17T17:00:00+05:30');
         const now = Date.now();
         let phase = 'live';
         if (now < startAt) phase = 'before';
@@ -265,8 +172,8 @@
           now,
           isOpen: phase === 'live',
           startLabel: '4:00 pm',
-          endLabel: '4:15 pm',
-          dateLabel: '18 Jun 2026',
+          endLabel: '5:00 pm',
+          dateLabel: '17 Jul 2026',
         };
       }
     }
@@ -331,7 +238,7 @@
     el.textContent = formatCountdown(target - Date.now());
   }
 
-  // Session expiry: auto-logout after 3 minutes or when event ends
+  // Session expiry: auto-logout after 20 minutes or when event ends
   function isSessionExpired() {
     if (!isPlayBypassed() && eventStatus?.endAt && Date.now() >= eventStatus.endAt) return true;
     if (isEventClosedForPlayer()) return true;
@@ -352,8 +259,8 @@
         clearInterval(sessionCheckInterval);
         sessionCheckInterval = null;
         if (gameState && gameState.timerInterval) clearInterval(gameState.timerInterval);
+        stopRunnerLoop();
         document.removeEventListener('keydown', handleMazeKey);
-        setFullscreenLock(false);
         showSessionExpiredModal(isEventClosedForPlayer() && eventStatus?.phase === 'after');
       }
     }, 1000);
@@ -370,8 +277,8 @@
         <div class="rank-modal-emoji">${eventEnded ? '🎬' : '⏱'}</div>
         <h2 style="color:var(--danger);">${eventEnded ? 'Gamethon Closed' : 'Session Expired'}</h2>
         <p>${eventEnded
-          ? `Today's Gamethon window (${eventStatus?.startLabel || '4:00 pm'} – ${eventStatus?.endLabel || '4:15 pm'}) has ended.`
-          : 'Your session has expired. Each Employee ID is valid for only 3 minutes after login.'}</p>
+          ? `Today's Gamethon window (${eventStatus?.startLabel || '4:00 pm'} – ${eventStatus?.endLabel || '5:00 pm'}) has ended.`
+          : 'Your session has expired. Each Employee ID is valid for only 20 minutes after login.'}</p>
         <p style="margin-top:8px;">${eventEnded ? 'Thank you for playing!' : 'Please log in again to play.'}</p>
         <div class="modal-actions" style="justify-content:center;margin-top:16px;">
           <button class="btn-primary" style="width:auto;margin-top:0;" id="expiredOk">Return to Login</button>
@@ -381,7 +288,6 @@
     document.body.appendChild(modal);
     document.getElementById('expiredOk').addEventListener('click', () => {
       modal.remove();
-      setFullscreenLock(false);
       // Save final state if in progress
       if (currentPlayer && currentPlayer.status === 'In Progress') {
         currentPlayer.status = 'Session Expired';
@@ -408,17 +314,25 @@
   const GAME_STEPS = [
     { id: 'spot', label: 'Shammi Puzzle', icon: '🧩' },
     { id: 'jumble', label: 'Guess Movie', icon: '🎬' },
-    { id: 'match', label: 'Dialogue Match', icon: '💬' },
+    { id: 'maze', label: 'Bollywood Maze', icon: '🗺️' },
     { id: 'guess', label: 'Guess Actress', icon: '⭐' },
-    { id: 'eye', label: 'Guess the Eye', icon: '👁' },
+    { id: 'runner', label: 'Star Runner', icon: '🏃' },
+    { id: 'memory', label: 'Memory Cards', icon: '🃏' },
+    { id: 'tictactoe', label: 'Tic-Tac-Toe', icon: '❌' },
+    { id: 'bigpuzzle', label: 'Amitabh Puzzle', icon: '🎭' },
+    { id: 'wordsearch', label: 'Word Search', icon: '🔍' },
   ];
 
   const CHALLENGE_CARDS = [
     { icon: '🧩', title: 'Shammi Kapoor Puzzle', desc: 'Swap tiles to rebuild the golden-era portrait' },
     { icon: '🎬', title: 'Guess the Movie', desc: 'Identify the blockbuster from a poster clue' },
-    { icon: '💬', title: 'Dialogue Match', desc: 'Pair legendary movies with iconic dialogues' },
+    { icon: '🗺️', title: 'Bollywood Maze', desc: 'Guide the star through the maze to the cinema' },
     { icon: '⭐', title: 'Guess the Actress', desc: 'Name Bollywood stars from childhood photos' },
-    { icon: '👁', title: 'Guess the Eye', desc: 'Match superstar eyes to their names' },
+    { icon: '🏃', title: 'Star Runner', desc: 'Dodge barriers and collect Bollywood stars' },
+    { icon: '🃏', title: 'Memory Cards', desc: 'Match all four cinema-themed pairs' },
+    { icon: '❌', title: 'Tic-Tac-Toe', desc: 'Beat the computer in a classic showdown' },
+    { icon: '🎭', title: 'Amitabh Mega Puzzle', desc: 'Rebuild a 4×4 portrait tile by tile' },
+    { icon: '🔍', title: 'Bollywood Word Search', desc: 'Find eight hidden star names in the letter grid' },
   ];
   // ======== GAME 1: SHAMMI KAPOOR PUZZLE ========
   const SHAMMI_PHOTO_URL = '/images/shammi_portrait_1781674060513.jpg';
@@ -443,15 +357,44 @@
     ]
   };
 
-  // ======== GAME 3: MATCH (Famous Movies & Dialogues) ========
-  const MATCH_PAIRS = [
-    { word: 'Anand (Rajesh Khanna)', meaning: '"Babu Moshai, zindagi badi honi chahiye… lambi nahi"' },
-    { word: 'Waqt', meaning: '"Jinke ghar sheeshe ke hote hain, woh doosron par patthar nahi phekte"' },
-    { word: 'Anand (Classic)', meaning: '"Zindagi aur maut upar waale ke haath mein hai jahapanah"' },
-    { word: 'Deewaar', meaning: '"Main aaj bhi pheke hue paise nahi uthata."' },
-    { word: 'Student of the Year (2012)', meaning: '"Life mein kuch banna ho, kuch haasil karna ho… toh hamesha dil ki suno"' },
-    { word: 'War (2019)', meaning: '"Jab tak todenge nahi… tab tak chhodenge nahi"' }
+  // ======== GAME 3: BOLLYWOOD MAZE (Bhooth Bangla) ========
+  const MAZE_GRID = [
+    '###############',
+    '#S..#.....#...#',
+    '#.#.#.###.#.#.#',
+    '#.#...#.#...#.#',
+    '#.#####.#####.#',
+    '#.....#.....#.#',
+    '#####.#.###.#.#',
+    '#...#.#.#.#.#.#',
+    '#.#.#.#.#.#.#.#',
+    '#.#.#...#.#...#',
+    '#.#.#####.###.#',
+    '#.#.......#.#.#',
+    '#.#######.#.#.#',
+    '#.........#..G#',
+    '###############',
   ];
+
+  // ======== GAMES 5–7 ========
+  const RUNNER_TARGET = 15;
+  const MEMORY_ICONS = ['🎬', '🍿', '🎵', '⭐'];
+
+  // ======== GAMES 8–9 ========
+  const AMITABH_PHOTO_URL = '/images/amitabh_portrait_1781597390482.jpg';
+  const BIG_PUZZLE_SIZE = 4;
+
+  const WORDSEARCH_WORDS = [
+    { key: 'AMITABH', label: 'Amitabh' },
+    { key: 'DEEPIKA', label: 'Deepika' },
+    { key: 'KAREENA', label: 'Kareena' },
+    { key: 'MADHURI', label: 'Madhuri' },
+    { key: 'SALMAN', label: 'Salman' },
+    { key: 'REKHA', label: 'Rekha' },
+    { key: 'RAJKAPOOR', label: 'Raj Kapoor' },
+    { key: 'SRIDEVI', label: 'Sridevi' },
+  ];
+  const WORDSEARCH_SIZE = 14;
 
   function shuffleArray(items) {
     const arr = [...items];
@@ -460,17 +403,6 @@
       [arr[i], arr[j]] = [arr[j], arr[i]];
     }
     return arr;
-  }
-
-  function initMatchShuffle() {
-    let words;
-    let meanings;
-    do {
-      words = shuffleArray(MATCH_PAIRS.map((p, i) => ({ text: p.word, id: i })));
-      meanings = shuffleArray(MATCH_PAIRS.map((p, i) => ({ text: p.meaning, id: i })));
-    } while (words.some((w, i) => w.id === meanings[i].id));
-    gameState.match.words = words;
-    gameState.match.meanings = meanings;
   }
 
   // ======== GAME 4: GUESS THE ACTRESS ========
@@ -533,8 +465,8 @@
     return sectionDeco(ARENA_DECO[idx] || ARENA_DECO[0]);
   }
   function initScoring() {
-    gameState.wrongCounts = { spot: 0, jumble: 0, match: 0, guess: 0, eye: 0 };
-    gameState.sectionScores = { spot: null, jumble: null, match: null, guess: null, eye: null };
+    gameState.wrongCounts = Object.fromEntries(SECTION_IDS.map(id => [id, 0]));
+    gameState.sectionScores = Object.fromEntries(SECTION_IDS.map(id => [id, null]));
     gameState.totalScore = 0;
   }
 
@@ -560,7 +492,7 @@
     const total = getLiveTotalScore();
     return {
       type: 'error',
-      text: `Wrong answer! −${WRONG_PENALTY} pts (${wrongs} wrong). This section: ${formatScore(remaining)} / ${POINTS_PER_SECTION}. Total: ${total} / 100.`,
+      text: `Wrong answer! −${WRONG_PENALTY} pts (${wrongs} wrong). This section: ${formatScore(remaining)} / ${POINTS_PER_SECTION}. Total: ${total} / ${MAX_SCORE}.`,
     };
   }
 
@@ -609,9 +541,13 @@
     return {
       spot: gameState.breakdown.spot,
       jumble: gameState.breakdown.jumble,
-      match: gameState.breakdown.match,
+      maze: gameState.breakdown.maze,
       guess: gameState.breakdown.guess,
-      eye: gameState.breakdown.eye,
+      runner: gameState.breakdown.runner,
+      memory: gameState.breakdown.memory,
+      tictactoe: gameState.breakdown.tictactoe,
+      bigpuzzle: gameState.breakdown.bigpuzzle,
+      wordsearch: gameState.breakdown.wordsearch,
       scores: { ...gameState.sectionScores },
       totalScore: gameState.totalScore,
       wrongCounts: { ...gameState.wrongCounts },
@@ -620,6 +556,111 @@
 
   function currentSectionId() {
     return SECTION_IDS[gameState.currentGame];
+  }
+
+  function currentGameNum() {
+    return gameState.currentGame + 1;
+  }
+
+  function createBigPuzzleGrid() {
+    const size = BIG_PUZZLE_SIZE * BIG_PUZZLE_SIZE;
+    let grid = Array.from({ length: size }, (_, i) => i);
+    do {
+      grid = shuffleArray(grid);
+    } while (grid.every((v, i) => v === i));
+    return grid;
+  }
+
+  function canPlaceWordSearchWord(grid, word, row, col, dr, dc) {
+    const size = grid.length;
+    for (let i = 0; i < word.length; i++) {
+      const r = row + dr * i;
+      const c = col + dc * i;
+      if (r < 0 || c < 0 || r >= size || c >= size) return false;
+      const cell = grid[r][c];
+      if (cell && cell !== word[i]) return false;
+    }
+    return true;
+  }
+
+  function placeWordSearchWord(grid, word, row, col, dr, dc) {
+    for (let i = 0; i < word.length; i++) {
+      grid[row + dr * i][col + dc * i] = word[i];
+    }
+  }
+
+  function createWordSearchBoard() {
+    const words = WORDSEARCH_WORDS.map(item => item.key);
+    const directions = [
+      [0, 1], [1, 0], [1, 1], [-1, 1],
+      [0, -1], [-1, 0], [-1, -1], [1, -1],
+    ];
+    for (let attempt = 0; attempt < 80; attempt++) {
+      const grid = Array.from({ length: WORDSEARCH_SIZE }, () => Array(WORDSEARCH_SIZE).fill(''));
+      const placed = [];
+      const ordered = shuffleArray(words).sort((a, b) => b.length - a.length);
+      let success = true;
+      for (const word of ordered) {
+        let wordPlaced = false;
+        const tries = shuffleArray(
+          Array.from({ length: WORDSEARCH_SIZE * WORDSEARCH_SIZE * directions.length }, (_, i) => i)
+        );
+        for (const tryIndex of tries) {
+          const pos = Math.floor(tryIndex / directions.length);
+          const dir = directions[tryIndex % directions.length];
+          const row = Math.floor(pos / WORDSEARCH_SIZE);
+          const col = pos % WORDSEARCH_SIZE;
+          if (canPlaceWordSearchWord(grid, word, row, col, dir[0], dir[1])) {
+            placeWordSearchWord(grid, word, row, col, dir[0], dir[1]);
+            placed.push(word);
+            wordPlaced = true;
+            break;
+          }
+        }
+        if (!wordPlaced) {
+          success = false;
+          break;
+        }
+      }
+      if (success) {
+        const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        for (let r = 0; r < WORDSEARCH_SIZE; r++) {
+          for (let c = 0; c < WORDSEARCH_SIZE; c++) {
+            if (!grid[r][c]) grid[r][c] = letters[Math.floor(Math.random() * letters.length)];
+          }
+        }
+        return { grid, placed };
+      }
+    }
+    const grid = Array.from({ length: WORDSEARCH_SIZE }, () => Array(WORDSEARCH_SIZE).fill(''));
+    const placed = [];
+    WORDSEARCH_WORDS.forEach((item, i) => {
+      const row = i + 1;
+      for (let c = 0; c < item.key.length; c++) grid[row][c] = item.key[c];
+      placed.push(item.key);
+    });
+    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    for (let r = 0; r < WORDSEARCH_SIZE; r++) {
+      for (let c = 0; c < WORDSEARCH_SIZE; c++) {
+        if (!grid[r][c]) grid[r][c] = letters[Math.floor(Math.random() * letters.length)];
+      }
+    }
+    return { grid, placed };
+  }
+
+  function getWordSearchLineCells(r1, c1, r2, c2) {
+    const dr = r2 - r1;
+    const dc = c2 - c1;
+    if (dr === 0 && dc === 0) return null;
+    if (dr !== 0 && dc !== 0 && Math.abs(dr) !== Math.abs(dc)) return null;
+    const steps = Math.max(Math.abs(dr), Math.abs(dc));
+    const sr = dr === 0 ? 0 : dr / Math.abs(dr);
+    const sc = dc === 0 ? 0 : dc / Math.abs(dc);
+    const cells = [];
+    for (let i = 0; i <= steps; i++) {
+      cells.push({ r: r1 + sr * i, c: c1 + sc * i });
+    }
+    return cells;
   }
 
   function formatTime(s) {
@@ -661,10 +702,10 @@
       <div class="login-screen">
         ${sectionDeco(SECTION_DECO.login)}
         <div class="login-visual">
-          <img class="app-logo app-logo--visual" src="${LOGO_URL}" alt="Bollywood Outdoor Cinema" />
+          <div class="gamethon-logo gamethon-logo--visual">GAMETHON</div>
           <div class="login-visual-badge">Indira IVF · Culture Club</div>
           <h2>Ready to Play?</h2>
-          <p>Five blockbuster challenges. Three minutes on the clock. Enter your details to join the arena.</p>
+          <p>Nine blockbuster challenges. Twenty minutes on the clock. Enter your details to join the arena.</p>
         </div>
         <div class="login-form-panel">
           <div class="login-form-inner">
@@ -946,18 +987,18 @@
       renderLogin();
       return;
     }
-    const minsLeft = currentPlayer.sessionExpiresAt ? Math.max(0, Math.ceil((currentPlayer.sessionExpiresAt - Date.now()) / 60000)) : 3;
+    const minsLeft = currentPlayer.sessionExpiresAt ? Math.max(0, Math.ceil((currentPlayer.sessionExpiresAt - Date.now()) / 60000)) : 20;
     const sessionAlert = isPlayBypassed()
       ? (isTestPlayer(currentPlayer)
         ? `⏱ Test account — session: <strong>${minsLeft} min</strong>`
         : `⏱ Test mode (EVENT_BYPASS=true) — session: <strong>${minsLeft} min</strong>`)
-      : `⏱ Gamethon closes at <strong>${eventStatus?.endLabel || '4:15 pm'}</strong> · <strong id="eventCountdown">${formatCountdown(eventStatus?.endsInMs || 0)}</strong> left · session: <strong>${minsLeft} min</strong>`;
+      : `⏱ Gamethon closes at <strong>${eventStatus?.endLabel || '5:00 pm'}</strong> · <strong id="eventCountdown">${formatCountdown(eventStatus?.endsInMs || 0)}</strong> left · session: <strong>${minsLeft} min</strong>`;
     app.innerHTML = `
       <div class="start-screen">
         ${sectionDeco(SECTION_DECO.start)}
         <div class="start-hero">
           <div class="start-hero-layout">
-            <img class="app-logo app-logo--start" src="${LOGO_URL}" alt="Bollywood Outdoor Cinema" />
+            <div class="gamethon-logo gamethon-logo--start">GAMETHON</div>
             <div class="start-hero-main">
               <span class="player-chip">Playing as <strong>${escapeHtml(currentPlayer.empName)}</strong> · ${escapeHtml(currentPlayer.empId)}</span>
               <h1>Ready to Play?</h1>
@@ -967,14 +1008,14 @@
         </div>
         <div class="start-content">
           <div class="start-section-head">
-            <h2>Five Challenges</h2>
-            <p class="start-score-highlight"><span class="start-score-highlight__icon" aria-hidden="true">🏆</span> <strong>100 pts max</strong> · <strong>−${WRONG_PENALTY} per wrong answer</strong></p>
+            <h2>Nine Challenges</h2>
+            <p class="start-score-highlight"><span class="start-score-highlight__icon" aria-hidden="true">🏆</span> <strong>${MAX_SCORE} pts max</strong> · <strong>−${WRONG_PENALTY} per wrong answer</strong></p>
           </div>
           <div class="challenge-grid">
             ${CHALLENGE_CARDS.map((c, i) => `
               <div class="challenge-card">
                 <div class="challenge-card-top">
-                  <span class="num">0${i + 1}</span>
+                  <span class="num">${String(i + 1).padStart(2, '0')}</span>
                   <span class="icon">${c.icon}</span>
                 </div>
                 <div class="title">${c.title}</div>
@@ -1019,9 +1060,6 @@
       return;
     }
     stopEventPoll();
-    setFullscreenLock(true);
-    await enterFullscreen();
-    await lockEscapeKey();
     gameState = {
       currentGame: 0,
       timeRemaining: allowedTime,
@@ -1029,14 +1067,38 @@
       timerInterval: null,
       startTime: Date.now(),
       gamesCompleted: 0,
-      breakdown: { spot: 'pending', jumble: 'pending', match: 'pending', guess: 'pending', eye: 'pending' },
+      breakdown: Object.fromEntries(SECTION_IDS.map(id => [id, 'pending'])),
       feedback: null,
       // Per-game state
       spot: { grid: [], selected: null },
       jumble: { chosen: null, options: [] },
-      match: { matched: [], selWord: null, selMean: null, wrong: null, words: [], meanings: [] },
+      maze: { row: 1, col: 1, moves: 0, solved: false },
       guess: { currentRound: 0, chosen: null, hintShown: false, options: shuffleArray(GUESS_ACTRESS_NAMES) },
-      eye: { selections: EYE_ROUNDS.map(() => null), submitted: false, lastVerifyFailed: false }
+      runner: {
+        lane: 1,
+        objects: [],
+        collected: 0,
+        tick: 0,
+        running: false,
+        completed: false,
+        loop: null,
+      },
+      memory: {
+        cards: shuffleArray([...MEMORY_ICONS, ...MEMORY_ICONS]).map((icon, id) => ({ id, icon, matched: false })),
+        open: [],
+        locked: false,
+      },
+      tictactoe: {
+        board: new Array(9).fill(null),
+        locked: false,
+      },
+      bigpuzzle: { grid: [], selected: null },
+      wordsearch: {
+        grid: [],
+        found: [],
+        activeCells: [],
+        anchor: null,
+      },
     };
     
     // Shuffle Game 1 pieces until not fully solved
@@ -1047,10 +1109,12 @@
     gameState.spot.grid = p_grid;
 
     gameState.jumble.options = [...ANDHADHUN_POSTER.spellingOptions].sort(() => Math.random() - 0.5);
+    gameState.bigpuzzle.grid = createBigPuzzleGrid();
+    const wordBoard = createWordSearchBoard();
+    gameState.wordsearch.grid = wordBoard.grid;
+    gameState.wordsearch.found = [];
 
     initScoring();
-
-    initMatchShuffle();
     
     gameState.timerInterval = setInterval(tickTimer, 1000);
     renderCurrentGame();
@@ -1079,14 +1143,18 @@
   }
 
   function renderCurrentGame() {
-    const games = ['spot', 'jumble', 'match', 'guess', 'eye'];
+    const games = SECTION_IDS;
     const g = games[gameState.currentGame];
     if (!g) { endGame('Completed'); return; }
     if (g === 'spot') renderSpot();
     else if (g === 'jumble') renderJumble();
-    else if (g === 'match') renderMatch();
+    else if (g === 'maze') renderMaze();
     else if (g === 'guess') renderGuess();
-    else if (g === 'eye') renderEye();
+    else if (g === 'runner') renderRunner();
+    else if (g === 'memory') renderMemory();
+    else if (g === 'tictactoe') renderTicTacToe();
+    else if (g === 'bigpuzzle') renderBigPuzzle();
+    else if (g === 'wordsearch') renderWordSearch();
   }
 
   function gameHeader(gameNum, gameTitle, subInfo) {
@@ -1111,7 +1179,7 @@
           </div>
           <div class="arena-stat-card">
             <div class="label">Score</div>
-            <div class="value"><strong class="${getLiveTotalScore() < 0 ? 'score-negative' : ''}">${getLiveTotalScore()}</strong> / 100</div>
+            <div class="value"><strong class="${getLiveTotalScore() < 0 ? 'score-negative' : ''}">${getLiveTotalScore()}</strong> / ${MAX_SCORE}</div>
           </div>
           <div class="arena-stat-card">
             <div class="label">This Section</div>
@@ -1119,7 +1187,7 @@
           </div>
           <div class="arena-stat-card">
             <div class="label">Progress</div>
-            <div class="value"><strong>${gameState.gamesCompleted} / 5</strong> cleared</div>
+            <div class="value"><strong>${gameState.gamesCompleted} / ${GAME_COUNT}</strong> cleared</div>
           </div>
           <div class="arena-progress">
             <div class="arena-progress-title">Challenges</div>
@@ -1130,9 +1198,12 @@
           <div class="arena-main-head">
             <div class="arena-main-head-row">
               <div class="arena-main-head-copy">
-                <div class="level-tag">Level ${gameNum} of 5</div>
+                <div class="level-tag">Level ${gameNum} of ${GAME_COUNT}</div>
                 <h2>${gameTitle}</h2>
                 <div class="sub">${subInfo || ''}</div>
+              </div>
+              <div class="arena-head-actions">
+                <button type="button" class="btn-secondary arena-prev-btn" id="skipSectionBtn">Skip</button>
               </div>
             </div>
           </div>
@@ -1144,25 +1215,31 @@
     return `</div></section></div>`;
   }
 
+  function skipCurrentSection() {
+    if (!gameState || gameState.currentGame >= GAME_COUNT) return;
+    if (!confirm('Skip this challenge? You will score 0 points for it.')) return;
+    advanceGame('skipped');
+  }
+
+  app.addEventListener('click', (e) => {
+    if (e.target.closest('#skipSectionBtn')) skipCurrentSection();
+  });
+
   function advanceGame(result) {
-    const games = ['spot', 'jumble', 'match', 'guess', 'eye'];
-    const g = games[gameState.currentGame];
+    if (!gameState || gameState.currentGame >= GAME_COUNT) return;
+    const games = SECTION_IDS;
+    const sectionIndex = gameState.currentGame;
+    const g = games[sectionIndex];
+    if (g === 'runner') stopRunnerLoop();
     finalizeSectionScore(g, result);
     gameState.breakdown[g] = result;
     if (result === 'solved') gameState.gamesCompleted++;
-    gameState.currentGame++;
+    gameState.currentGame = sectionIndex + 1;
     gameState.feedback = null;
 
-    if (gameState.currentGame >= 5) {
+    if (gameState.currentGame >= GAME_COUNT) {
       endGame('Completed');
       return;
-    }
-    if (games[gameState.currentGame] === 'match') {
-      gameState.match.matched = [];
-      gameState.match.selWord = null;
-      gameState.match.selMean = null;
-      gameState.match.wrong = null;
-      initMatchShuffle();
     }
     renderCurrentGame();
   }
@@ -1172,7 +1249,7 @@
     const s = gameState.spot;
     const isSolved = s.grid.every((v, i) => v === i);
     
-    app.innerHTML = gameHeader(1, 'Shammi Kapoor Puzzle', isSolved ? 'Portrait complete!' : 'Arrange the tiles to rebuild the portrait') +
+    app.innerHTML = gameHeader(currentGameNum(), 'Shammi Kapoor Puzzle', isSolved ? 'Portrait complete!' : 'Arrange the tiles to rebuild the portrait') +
       (gameState.feedback ? `<div class="feedback ${gameState.feedback.type}">${gameState.feedback.text}</div>` : '') +
       `<p class="instruction">Tap a tile to select it, then tap another to swap. Reconstruct Shammi Kapoor's portrait!</p>
       <div class="puzzle-layout">
@@ -1231,7 +1308,7 @@
     const finished = r.chosen !== null;
     const isCorrect = finished && r.chosen === ANDHADHUN_POSTER.answer;
 
-    app.innerHTML = gameHeader(2, 'Guess the Movie', 'Identify the blockbuster from the poster clue') +
+    app.innerHTML = gameHeader(currentGameNum(), 'Guess the Movie', 'Identify the blockbuster from the poster clue') +
       (gameState.feedback ? `<div class="feedback ${gameState.feedback.type}">${gameState.feedback.text}</div>` : '') +
       `<p class="instruction">Study the poster below and pick the <strong>correct spelling</strong> of the movie name.</p>
       <div class="game-panel">
@@ -1277,79 +1354,66 @@
 
   }
 
-  // ======== DIALOGUE MATCH ========
-  function renderMatch() {
-    const m = gameState.match;
-    const done = m.matched.length === MATCH_PAIRS.length;
-    app.innerHTML = gameHeader(3, 'Dialogue Match', `Matched ${m.matched.length} of ${MATCH_PAIRS.length}`) +
+  // ======== GAME 3: BOLLYWOOD MAZE ========
+  function renderMaze() {
+    const maze = gameState.maze;
+    const cells = MAZE_GRID.flatMap((row, rowIndex) =>
+      [...row].map((cell, colIndex) => {
+        const isPlayer = maze.row === rowIndex && maze.col === colIndex;
+        let className = 'maze-cell';
+        let content = '';
+        if (cell === '#') className += ' maze-wall';
+        else className += ' maze-path';
+        if (cell === 'G') {
+          className += ' maze-goal';
+          content = '🎦';
+        }
+        if (isPlayer) {
+          className += ' maze-player';
+          content = '⭐';
+        }
+        return `<div class="${className}" aria-hidden="true">${content}</div>`;
+      })
+    ).join('');
+
+    app.innerHTML = gameHeader(currentGameNum(), 'Bollywood Maze', `${maze.moves} moves`) +
       (gameState.feedback ? `<div class="feedback ${gameState.feedback.type}">${gameState.feedback.text}</div>` : '') +
-      `<p class="instruction">Tap a movie on the left, then tap its matching dialogue on the right.</p>
-      <div class="match-grid">
-        <div class="match-col">
-          <div class="match-col-title">Movies</div>
-          ${m.words.map(w => {
-            const isMatched = m.matched.includes(w.id);
-            const isSel = m.selWord === w.id;
-            const isWrong = m.wrong && m.wrong.w === w.id;
-            return `<div class="match-item ${isMatched ? 'matched' : ''} ${isSel ? 'selected' : ''} ${isWrong ? 'wrong' : ''}" data-w="${w.id}">${w.text}</div>`;
-          }).join('')}
-        </div>
-        <div class="match-col">
-          <div class="match-col-title">Dialogues</div>
-          ${m.meanings.map(x => {
-            const isMatched = m.matched.includes(x.id);
-            const isSel = m.selMean === x.id;
-            const isWrong = m.wrong && m.wrong.m === x.id;
-            return `<div class="match-item ${isMatched ? 'matched' : ''} ${isSel ? 'selected' : ''} ${isWrong ? 'wrong' : ''}" data-m="${x.id}">${x.text}</div>`;
-          }).join('')}
+      `<p class="instruction">Guide the star ⭐ to the cinema 🎦 using the arrow keys or controls.</p>
+      <div class="arcade-layout">
+        <div class="arcade-playfield">
+          <div class="maze-board" role="img" aria-label="Maze puzzle">${cells}</div>
+          ${directionControls('maze')}
         </div>
       </div>` + gameFooter();
 
-    document.querySelectorAll('[data-w]').forEach(el => {
-      el.addEventListener('click', () => {
-        const id = parseInt(el.dataset.w);
-        if (m.matched.includes(id)) return;
-        m.selWord = id;
-        checkMatch();
-      });
-    });
-    document.querySelectorAll('[data-m]').forEach(el => {
-      el.addEventListener('click', () => {
-        const id = parseInt(el.dataset.m);
-        if (m.matched.includes(id)) return;
-        m.selMean = id;
-        checkMatch();
-      });
-    });
+    bindDirectionControls('maze');
   }
 
-  function checkMatch() {
-    const m = gameState.match;
-    if (m.selWord !== null && m.selMean !== null) {
-      if (m.selWord === m.selMean) {
-        m.matched.push(m.selWord);
-        m.selWord = null; m.selMean = null; m.wrong = null;
-        if (m.matched.length === MATCH_PAIRS.length) {
-          gameState.feedback = { type: 'success', text: '🎉 All matched! ' + formatScore(sectionPointsRemaining('match')) + ' pts for this section.' };
-          renderMatch();
-          setTimeout(() => advanceGame('solved'), 900);
-          return;
-        }
-        renderMatch();
-      } else {
-        applyWrongPenalty('match');
-        m.wrong = { w: m.selWord, m: m.selMean };
-        gameState.feedback = wrongAnswerFeedback('match');
-        renderMatch();
-        setTimeout(() => {
-          m.selWord = null; m.selMean = null; m.wrong = null;
-          gameState.feedback = null;
-          renderMatch();
-        }, 700);
-      }
-    } else {
-      renderMatch();
+  function moveMaze(dx, dy) {
+    if (!gameState || currentSectionId() !== 'maze' || gameState.maze.solved) return;
+    const maze = gameState.maze;
+    const nextRow = maze.row + dy;
+    const nextCol = maze.col + dx;
+    const target = MAZE_GRID[nextRow]?.[nextCol];
+    if (!target || target === '#') {
+      return;
     }
+
+    maze.row = nextRow;
+    maze.col = nextCol;
+    maze.moves++;
+    gameState.feedback = null;
+    if (target === 'G') {
+      maze.solved = true;
+      gameState.feedback = { type: 'success', text: `🎉 Maze solved in ${maze.moves} moves! ${formatScore(sectionPointsRemaining('maze'))} pts.` };
+      renderMaze();
+      const sectionIndex = gameState.currentGame;
+      setTimeout(() => {
+        if (gameState?.currentGame === sectionIndex) advanceGame('solved');
+      }, 900);
+      return;
+    }
+    renderMaze();
   }
 
   // ======== GAME 4: GUESS THE ACTRESS ========
@@ -1359,7 +1423,7 @@
     const isFinished = gs.chosen !== null;
     const isCorrect = isFinished && gs.chosen === round.answer;
 
-    app.innerHTML = gameHeader(4, 'Guess the Actress', `Round ${gs.currentRound + 1} of ${GUESS_ROUNDS.length}`) +
+    app.innerHTML = gameHeader(currentGameNum(), 'Guess the Actress', `Round ${gs.currentRound + 1} of ${GUESS_ROUNDS.length}`) +
       (gameState.feedback ? `<div class="feedback ${gameState.feedback.type}">${gameState.feedback.text}</div>` : '') +
       `<p class="instruction">Examine the childhood photo and identify the Bollywood superstar.</p>
       <div class="game-panel">
@@ -1430,140 +1494,454 @@
 
   }
 
-  function handleMazeKey() {
-    // Left as noop to prevent breaking existing unregister handlers
+  function directionControls(game) {
+    return `
+      <div class="arcade-controls" aria-label="Direction controls">
+        <button type="button" class="arcade-control arcade-control--up" data-game="${game}" data-direction="up" aria-label="Move up">▲</button>
+        <button type="button" class="arcade-control arcade-control--left" data-game="${game}" data-direction="left" aria-label="Move left">◀</button>
+        <button type="button" class="arcade-control arcade-control--down" data-game="${game}" data-direction="down" aria-label="Move down">▼</button>
+        <button type="button" class="arcade-control arcade-control--right" data-game="${game}" data-direction="right" aria-label="Move right">▶</button>
+      </div>`;
   }
 
-  // ======== GAME 5: GUESS THE EYE AND MATCH THE FOLLOWING ========
-  const EYE_CANDIDATES = [
-    'Hema Malini',
-    'Rekha',
-    'Jaya Bachchan',
-    'Sharmila Tagore',
-    'Zeenat Aman',
-    'Parveen Babi',
-    'Rakhee',
-    'Mumtaz',
-    'Saira Banu',
-    'Rajesh Khanna',
-  ];
+  function directionVector(direction) {
+    return {
+      up: { x: 0, y: -1 },
+      down: { x: 0, y: 1 },
+      left: { x: -1, y: 0 },
+      right: { x: 1, y: 0 },
+    }[direction];
+  }
 
-  const EYE_ROUNDS = [
-    {
-      img: '/images/hema_malini_eyes_crop.png',
-      answer: 'Hema Malini',
-      title: 'Gaze Alpha',
-      hint: 'The Dream Girl of Bollywood — dancer, MP, and star of Sholay and Seeta Aur Geeta!',
-    },
-    {
-      img: '/images/rajesh_khanna_eyes_crop.png',
-      answer: 'Rajesh Khanna',
-      title: 'Gaze Beta',
-      hint: 'India\'s historic first superstar, legendary voice of "Anand" and romantic head tilt!',
-    },
-  ];
+  function bindDirectionControls(game) {
+    document.querySelectorAll(`[data-game="${game}"][data-direction]`).forEach(button => {
+      button.addEventListener('click', () => {
+        const vector = directionVector(button.dataset.direction);
+        if (game === 'maze') moveMaze(vector.x, vector.y);
+      });
+    });
+  }
 
-  function renderEye() {
-    const eyeState = gameState.eye;
-    const allSelected = eyeState.selections.every(s => s !== null);
-    const locked = eyeState.submitted && !eyeState.lastVerifyFailed;
+  function handleMazeKey(event) {
+    const keyDirections = {
+      ArrowUp: 'up', w: 'up', W: 'up',
+      ArrowDown: 'down', s: 'down', S: 'down',
+      ArrowLeft: 'left', a: 'left', A: 'left',
+      ArrowRight: 'right', d: 'right', D: 'right',
+    };
+    const direction = keyDirections[event.key];
+    if (!direction || !gameState) return;
+    const section = currentSectionId();
+    if (section !== 'maze' && section !== 'runner') return;
+    event.preventDefault();
+    const vector = directionVector(direction);
+    if (section === 'maze') moveMaze(vector.x, vector.y);
+    else if (vector.x) moveRunner(vector.x);
+  }
 
-    app.innerHTML = gameHeader(5, 'Guess the Eye', 'Final challenge — match each gaze to a superstar') +
+  // ======== GAME 5: STAR RUNNER ========
+  function runnerCellsHtml() {
+    const runner = gameState.runner;
+    const objects = new Map(runner.objects.map(item => [`${item.lane},${item.row}`, item.type]));
+    let html = '';
+    for (let row = 0; row < 6; row++) {
+      for (let lane = 0; lane < 3; lane++) {
+        const type = objects.get(`${lane},${row}`);
+        const isPlayer = row === 5 && lane === runner.lane;
+        const content = isPlayer ? '🏃' : type === 'star' ? '⭐' : type === 'barrier' ? '🚧' : '';
+        const cls = isPlayer ? ' runner-player' : type ? ` runner-${type}` : '';
+        html += `<div class="runner-cell${cls}">${content}</div>`;
+      }
+    }
+    return html;
+  }
+
+  function renderRunner() {
+    const runner = gameState.runner;
+    app.innerHTML = gameHeader(currentGameNum(), 'Bollywood Star Runner', `${runner.collected} of ${RUNNER_TARGET} stars collected`) +
       (gameState.feedback ? `<div class="feedback ${gameState.feedback.type}">${gameState.feedback.text}</div>` : '') +
-      `<p class="instruction">Match both eye close-ups to the correct superstar from the list of legendary contenders.</p>
-      <div class="eyes-grid eyes-grid-2">
-        ${EYE_ROUNDS.map((round, idx) => {
-          const selectedActor = eyeState.selections[idx];
-          let cardCls = 'eye-card';
-          let badgeHtml = '';
-          if (eyeState.submitted && eyeState.lastVerifyFailed) {
-            if (selectedActor && selectedActor !== round.answer) {
-              cardCls += ' incorrect';
-              badgeHtml = '<span class="eye-badge no">Wrong</span>';
-            }
-          } else if (eyeState.submitted && !eyeState.lastVerifyFailed) {
-            cardCls += ' correct';
-            badgeHtml = '<span class="eye-badge ok">Correct</span>';
-          }
-          return `
-            <div class="${cardCls}" data-idx="${idx}">
-              ${badgeHtml}
-              <div class="eye-card-title">${round.title}</div>
-              <div class="eye-photo-frame eyes-only">
-                <img src="${round.img}" class="eye-crop" alt="Superstar eyes" referrerPolicy="no-referrer">
-              </div>
-              <div class="eye-card-options-label">Select superstar</div>
-              <div class="options-grid cols-2 eye-options">
-                ${EYE_CANDIDATES.map(cand => {
-                  let btnCls = 'match-item';
-                  if (selectedActor === cand) btnCls += ' selected';
-                  if (locked) {
-                    if (selectedActor === cand) btnCls += ' matched';
-                    else btnCls += ' disabled';
-                  } else if (eyeState.submitted && eyeState.lastVerifyFailed) {
-                    if (selectedActor === cand && cand !== round.answer) btnCls += ' wrong';
-                    else if (cand !== selectedActor) btnCls += ' disabled';
-                  }
-                  return `<div class="${btnCls}" data-card-idx="${idx}" data-val="${cand}">${cand}</div>`;
-                }).join('')}
-              </div>
-              <div class="eye-hint">${round.hint}</div>
-            </div>
-          `;
-        }).join('')}
-      </div>
-      <div class="game-actions centered eye-verify-actions">
-        <button class="btn-success" id="submitEyeBtn" ${!allSelected || locked ? 'disabled' : ''}>Verify Matches</button>
+      `<p class="instruction">Move left and right to collect stars ⭐ and dodge barriers 🚧.</p>
+      <div class="runner-layout">
+        <div class="runner-score">Stars: <strong id="runnerCollected">${runner.collected} / ${RUNNER_TARGET}</strong></div>
+        <div class="runner-road" id="runnerRoad">${runnerCellsHtml()}</div>
+        <div class="runner-controls">
+          <button type="button" class="arcade-control" id="runnerLeft" aria-label="Move left">◀</button>
+          ${runner.running || runner.completed ? '' : '<button type="button" class="btn-primary runner-start" id="runnerStart">Start Run</button>'}
+          <button type="button" class="arcade-control" id="runnerRight" aria-label="Move right">▶</button>
+        </div>
       </div>` + gameFooter();
 
-    if (!locked && !(eyeState.submitted && eyeState.lastVerifyFailed)) {
-      document.querySelectorAll('.eye-options .match-item').forEach(item => {
-        item.addEventListener('click', () => {
-          const cardIdx = parseInt(item.dataset.cardIdx);
-          eyeState.selections[cardIdx] = item.dataset.val;
-          renderEye();
-        });
-      });
+    document.getElementById('runnerLeft')?.addEventListener('click', () => moveRunner(-1));
+    document.getElementById('runnerRight')?.addEventListener('click', () => moveRunner(1));
+    document.getElementById('runnerStart')?.addEventListener('click', startRunner);
+  }
+
+  function startRunner() {
+    if (!gameState || currentSectionId() !== 'runner' || gameState.runner.running) return;
+    gameState.runner.running = true;
+    gameState.feedback = null;
+    gameState.runner.loop = setInterval(stepRunner, 360);
+    renderRunner();
+  }
+
+  function stopRunnerLoop() {
+    if (gameState?.runner?.loop) clearInterval(gameState.runner.loop);
+    if (gameState?.runner) {
+      gameState.runner.loop = null;
+      gameState.runner.running = false;
+    }
+  }
+
+  function moveRunner(delta) {
+    if (!gameState || currentSectionId() !== 'runner') return;
+    const runner = gameState.runner;
+    runner.lane = Math.max(0, Math.min(2, runner.lane + delta));
+    updateRunnerBoard();
+  }
+
+  function updateRunnerBoard() {
+    const road = document.getElementById('runnerRoad');
+    if (road) road.innerHTML = runnerCellsHtml();
+    const score = document.getElementById('runnerCollected');
+    if (score) score.textContent = `${gameState.runner.collected} / ${RUNNER_TARGET}`;
+  }
+
+  function stepRunner() {
+    if (!gameState || currentSectionId() !== 'runner') {
+      stopRunnerLoop();
+      return;
+    }
+    const runner = gameState.runner;
+    runner.tick++;
+    runner.objects = runner.objects
+      .map(item => ({ ...item, row: item.row + 1 }))
+      .filter(item => item.row < 6);
+
+    const collision = runner.objects.find(item => item.row === 5 && item.lane === runner.lane);
+    if (collision) {
+      runner.objects = runner.objects.filter(item => item !== collision);
+      if (collision.type === 'star') {
+        runner.collected++;
+      } else {
+        applyWrongPenalty('runner');
+        gameState.feedback = { type: 'error', text: `Barrier hit! −${WRONG_PENALTY} points.` };
+        renderRunner();
+      }
     }
 
-    const submitBtn = document.getElementById('submitEyeBtn');
-    if (submitBtn) {
-      submitBtn.addEventListener('click', () => {
-        eyeState.submitted = true;
-        const correctAnswers = EYE_ROUNDS.map(r => r.answer);
-        const matchesAll = eyeState.selections.every((sel, i) => sel === correctAnswers[i]);
+    if (runner.collected >= RUNNER_TARGET) {
+      stopRunnerLoop();
+      runner.completed = true;
+      gameState.feedback = { type: 'success', text: `🎉 Run complete! ${formatScore(sectionPointsRemaining('runner'))} pts.` };
+      renderRunner();
+      const sectionIndex = gameState.currentGame;
+      setTimeout(() => {
+        if (gameState?.currentGame === sectionIndex) advanceGame('solved');
+      }, 900);
+      return;
+    }
 
-        if (matchesAll) {
-          eyeState.lastVerifyFailed = false;
-          gameState.feedback = { type: 'success', text: '🎉 All matches correct! ' + formatScore(sectionPointsRemaining('eye')) + ' pts for this section.' };
-          renderEye();
-          setTimeout(() => advanceGame('solved'), 1500);
+    if (runner.tick % 2 === 0) {
+      runner.objects.push({
+        lane: Math.floor(Math.random() * 3),
+        row: 0,
+        type: Math.random() < 0.72 ? 'star' : 'barrier',
+      });
+    }
+    updateRunnerBoard();
+  }
+
+  // ======== GAME 6: MEMORY CARDS ========
+  function renderMemory() {
+    const memory = gameState.memory;
+    app.innerHTML = gameHeader(currentGameNum(), 'Bollywood Memory Cards', `${memory.cards.filter(card => card.matched).length / 2} of ${MEMORY_ICONS.length} pairs`) +
+      (gameState.feedback ? `<div class="feedback ${gameState.feedback.type}">${gameState.feedback.text}</div>` : '') +
+      `<p class="instruction">Flip two cards and match all four cinema-themed pairs.</p>
+      <div class="memory-grid">
+        ${memory.cards.map(card => {
+          const visible = card.matched || memory.open.includes(card.id);
+          return `<button type="button" class="memory-card${visible ? ' is-flipped' : ''}${card.matched ? ' is-matched' : ''}" data-memory-id="${card.id}" ${memory.locked || card.matched ? 'disabled' : ''}>
+            <span class="memory-card-inner"><span class="memory-back">?</span><span class="memory-face">${card.icon}</span></span>
+          </button>`;
+        }).join('')}
+      </div>` + gameFooter();
+
+    document.querySelectorAll('[data-memory-id]').forEach(card => {
+      card.addEventListener('click', () => flipMemoryCard(Number(card.dataset.memoryId)));
+    });
+  }
+
+  function flipMemoryCard(id) {
+    const memory = gameState.memory;
+    if (memory.locked || memory.open.includes(id)) return;
+    memory.open.push(id);
+    if (memory.open.length < 2) {
+      renderMemory();
+      return;
+    }
+
+    memory.locked = true;
+    const [firstId, secondId] = memory.open;
+    const first = memory.cards.find(card => card.id === firstId);
+    const second = memory.cards.find(card => card.id === secondId);
+    if (first.icon === second.icon) {
+      first.matched = true;
+      second.matched = true;
+      memory.open = [];
+      memory.locked = false;
+      const complete = memory.cards.every(card => card.matched);
+      gameState.feedback = complete ? { type: 'success', text: `🎉 All pairs matched! ${formatScore(sectionPointsRemaining('memory'))} pts.` } : null;
+      renderMemory();
+      if (complete) {
+        const sectionIndex = gameState.currentGame;
+        setTimeout(() => {
+          if (gameState?.currentGame === sectionIndex) advanceGame('solved');
+        }, 900);
+      }
+      return;
+    }
+
+    applyWrongPenalty('memory');
+    gameState.feedback = wrongAnswerFeedback('memory');
+    renderMemory();
+    const sectionIndex = gameState.currentGame;
+    setTimeout(() => {
+      if (!gameState || gameState.currentGame !== sectionIndex) return;
+      memory.open = [];
+      memory.locked = false;
+      gameState.feedback = null;
+      renderMemory();
+    }, 850);
+  }
+
+  // ======== GAME 7: TIC-TAC-TOE ========
+  const TTT_WINS = [
+    [0, 1, 2], [3, 4, 5], [6, 7, 8],
+    [0, 3, 6], [1, 4, 7], [2, 5, 8],
+    [0, 4, 8], [2, 4, 6],
+  ];
+
+  function ticTacToeWinner(board) {
+    for (const [a, b, c] of TTT_WINS) {
+      if (board[a] && board[a] === board[b] && board[a] === board[c]) return board[a];
+    }
+    return board.every(Boolean) ? 'draw' : null;
+  }
+
+  function renderTicTacToe() {
+    const ttt = gameState.tictactoe;
+    app.innerHTML = gameHeader(currentGameNum(), 'Bollywood Tic-Tac-Toe', 'You are X · beat the computer') +
+      (gameState.feedback ? `<div class="feedback ${gameState.feedback.type}">${gameState.feedback.text}</div>` : '') +
+      `<p class="instruction">Place three X marks in a row before the computer places three O marks.</p>
+      <div class="ttt-board">
+        ${ttt.board.map((cell, index) => `<button type="button" class="ttt-cell ${cell ? `ttt-${cell.toLowerCase()}` : ''}" data-ttt="${index}" ${cell || ttt.locked ? 'disabled' : ''}>${cell || ''}</button>`).join('')}
+      </div>` + gameFooter();
+
+    document.querySelectorAll('[data-ttt]').forEach(cell => {
+      cell.addEventListener('click', () => playTicTacToe(Number(cell.dataset.ttt)));
+    });
+  }
+
+  function resetTicTacToe(message) {
+    setTimeout(() => {
+      if (!gameState || currentSectionId() !== 'tictactoe') return;
+      gameState.tictactoe.board = new Array(9).fill(null);
+      gameState.tictactoe.locked = false;
+      gameState.feedback = message ? { type: 'info', text: message } : null;
+      renderTicTacToe();
+    }, 900);
+  }
+
+  function playTicTacToe(index) {
+    const ttt = gameState.tictactoe;
+    if (ttt.locked || ttt.board[index]) return;
+    ttt.board[index] = 'X';
+    let winner = ticTacToeWinner(ttt.board);
+    if (winner === 'X') {
+      ttt.locked = true;
+      gameState.feedback = { type: 'success', text: `🎉 You won! ${formatScore(sectionPointsRemaining('tictactoe'))} pts.` };
+      renderTicTacToe();
+      const sectionIndex = gameState.currentGame;
+      setTimeout(() => {
+        if (gameState?.currentGame === sectionIndex) advanceGame('solved');
+      }, 900);
+      return;
+    }
+    if (winner === 'draw') {
+      ttt.locked = true;
+      applyWrongPenalty('tictactoe');
+      gameState.feedback = { type: 'error', text: `Draw! −${WRONG_PENALTY} points. New board starting…` };
+      renderTicTacToe();
+      resetTicTacToe();
+      return;
+    }
+
+    const open = ttt.board.map((cell, i) => cell ? null : i).filter(i => i !== null);
+    ttt.board[open[Math.floor(Math.random() * open.length)]] = 'O';
+    winner = ticTacToeWinner(ttt.board);
+    if (winner === 'O' || winner === 'draw') {
+      ttt.locked = true;
+      applyWrongPenalty('tictactoe');
+      gameState.feedback = { type: 'error', text: `${winner === 'O' ? 'Computer won' : 'Draw'}! −${WRONG_PENALTY} points. New board starting…` };
+      renderTicTacToe();
+      resetTicTacToe();
+      return;
+    }
+    renderTicTacToe();
+  }
+
+  // ======== GAME 8: AMITABH 4×4 PUZZLE ========
+  function renderBigPuzzle() {
+    const s = gameState.bigpuzzle;
+    const isSolved = s.grid.every((v, i) => v === i);
+    const step = 100 / (BIG_PUZZLE_SIZE - 1);
+
+    app.innerHTML = gameHeader(currentGameNum(), 'Amitabh Mega Puzzle', isSolved ? 'Portrait complete!' : '16 tiles — take your time!') +
+      (gameState.feedback ? `<div class="feedback ${gameState.feedback.type}">${gameState.feedback.text}</div>` : '') +
+      `<p class="instruction">Swap tiles to rebuild Amitabh Bachchan's portrait. This 4×4 puzzle takes focus and patience.</p>
+      <div class="puzzle-layout">
+        <div class="puzzle-board puzzle-board--4" id="puzzleBoard">
+          ${s.grid.map((originalIdx, currentPos) => {
+            const col = originalIdx % BIG_PUZZLE_SIZE;
+            const row = Math.floor(originalIdx / BIG_PUZZLE_SIZE);
+            const isSelected = s.selected === currentPos;
+            return `
+              <div class="puzzle-tile puzzle-tile--4${isSelected ? ' selected' : ''}" data-pos="${currentPos}" style="
+                background-image: url('${AMITABH_PHOTO_URL}');
+                background-size: 400% 400%;
+                background-position: ${col * step}% ${row * step}%;
+              "></div>
+            `;
+          }).join('')}
+        </div>
+        <div class="puzzle-preview">
+          <div class="puzzle-preview-label">Target</div>
+          <div class="puzzle-preview-img">
+            <img src="${AMITABH_PHOTO_URL}" alt="Target portrait" referrerPolicy="no-referrer">
+          </div>
+          <div class="puzzle-preview-caption">Big B · Legend</div>
+        </div>
+      </div>` + gameFooter();
+
+    document.querySelectorAll('.puzzle-tile').forEach(tile => {
+      tile.addEventListener('click', () => {
+        if (isSolved) return;
+        const pos = parseInt(tile.dataset.pos, 10);
+        if (s.selected === null) {
+          s.selected = pos;
+          renderBigPuzzle();
         } else {
-          eyeState.lastVerifyFailed = true;
-          eyeState.selections.forEach((sel, i) => {
-            if (sel !== correctAnswers[i]) applyWrongPenalty('eye');
-          });
-          gameState.feedback = wrongAnswerFeedback('eye');
-          renderEye();
-          setTimeout(() => {
-            eyeState.submitted = false;
-            eyeState.lastVerifyFailed = false;
-            gameState.feedback = null;
-            renderEye();
-          }, 2500);
+          const temp = s.grid[s.selected];
+          s.grid[s.selected] = s.grid[pos];
+          s.grid[pos] = temp;
+          s.selected = null;
+
+          if (s.grid.every((v, i) => v === i)) {
+            gameState.feedback = { type: 'success', text: '🎉 Mega puzzle solved! ' + formatScore(sectionPointsRemaining('bigpuzzle')) + ' pts for this section.' };
+            renderBigPuzzle();
+            setTimeout(() => advanceGame('solved'), 1100);
+            return;
+          }
+          renderBigPuzzle();
         }
       });
+    });
+  }
+
+  // ======== GAME 9: BOLLYWOOD WORD SEARCH ========
+  function renderWordSearch() {
+    const ws = gameState.wordsearch;
+    const foundCount = ws.found.length;
+    const totalWords = WORDSEARCH_WORDS.length;
+
+    app.innerHTML = gameHeader(currentGameNum(), 'Bollywood Word Search', `${foundCount} of ${totalWords} names found`) +
+      (gameState.feedback ? `<div class="feedback ${gameState.feedback.type}">${gameState.feedback.text}</div>` : '') +
+      `<p class="instruction">Click the first letter, then the last letter of a hidden name (straight lines only). Find all eight stars!</p>
+      <div class="wordsearch-layout">
+        <div class="wordsearch-board" id="wordsearchBoard">
+          ${ws.grid.map((row, r) =>
+            row.map((letter, c) => {
+              const active = ws.activeCells.some(cell => cell.r === r && cell.c === c);
+              const found = ws.found.some(word => word.cells.some(cell => cell.r === r && cell.c === c));
+              return `<button type="button" class="wordsearch-cell${active ? ' is-active' : ''}${found ? ' is-found' : ''}" data-ws-r="${r}" data-ws-c="${c}">${letter}</button>`;
+            }).join('')
+          ).join('')}
+        </div>
+        <div class="wordsearch-list">
+          <div class="wordsearch-list-title">Find these names</div>
+          ${WORDSEARCH_WORDS.map(item => `
+            <div class="wordsearch-word${ws.found.some(entry => entry.key === item.key) ? ' is-found' : ''}">${item.label}</div>
+          `).join('')}
+        </div>
+      </div>` + gameFooter();
+
+    document.querySelectorAll('[data-ws-r]').forEach(cell => {
+      cell.addEventListener('click', () => {
+        const r = Number(cell.dataset.wsR);
+        const c = Number(cell.dataset.wsC);
+        handleWordSearchClick(r, c);
+      });
+    });
+  }
+
+  function handleWordSearchClick(r, c) {
+    const ws = gameState.wordsearch;
+    if (!ws.anchor) {
+      ws.anchor = { r, c };
+      ws.activeCells = [{ r, c }];
+      renderWordSearch();
+      return;
     }
+
+    const line = getWordSearchLineCells(ws.anchor.r, ws.anchor.c, r, c);
+    ws.anchor = null;
+    ws.activeCells = [];
+    if (!line || line.length < 3) {
+      renderWordSearch();
+      return;
+    }
+
+    const selected = line.map(cell => ws.grid[cell.r][cell.c]).join('');
+    const reversed = selected.split('').reverse().join('');
+    const match = WORDSEARCH_WORDS.find(item =>
+      !ws.found.some(found => found.key === item.key) &&
+      (item.key === selected || item.key === reversed)
+    );
+
+    if (match) {
+      ws.found.push({ key: match.key, cells: line });
+      gameState.feedback = null;
+      if (ws.found.length >= WORDSEARCH_WORDS.length) {
+        gameState.feedback = { type: 'success', text: `🎉 All names found! ${formatScore(sectionPointsRemaining('wordsearch'))} pts.` };
+        renderWordSearch();
+        const sectionIndex = gameState.currentGame;
+        setTimeout(() => {
+          if (gameState?.currentGame === sectionIndex) advanceGame('solved');
+        }, 900);
+        return;
+      }
+      renderWordSearch();
+      return;
+    }
+
+    applyWrongPenalty('wordsearch');
+    gameState.feedback = wrongAnswerFeedback('wordsearch');
+    renderWordSearch();
+    setTimeout(() => {
+      if (currentSectionId() !== 'wordsearch') return;
+      gameState.feedback = null;
+      renderWordSearch();
+    }, 900);
   }
 
   // ======== END GAME ========
   function endGame(status) {
-    setFullscreenLock(false);
     clearInterval(gameState.timerInterval);
+    stopRunnerLoop();
     document.removeEventListener('keydown', handleMazeKey);
     const timeTaken = TOTAL_TIME - gameState.timeRemaining;
 
-    if ((status === 'Timeout' || status === 'Event Ended') && gameState.currentGame < 5) {
+    if ((status === 'Timeout' || status === 'Event Ended') && gameState.currentGame < GAME_COUNT) {
       const g = SECTION_IDS[gameState.currentGame];
       if (gameState.breakdown[g] === 'pending') {
         gameState.breakdown[g] = 'missed';
@@ -1593,9 +1971,19 @@
     const bd = currentPlayer.breakdown || gameState.breakdown;
     const scores = bd.scores || gameState.sectionScores || {};
     const totalScore = bd.totalScore ?? gameState.totalScore ?? 0;
-    const scorePct = Math.min(100, Math.max(0, totalScore));
-    const labels = { spot: 'Shammi Kapoor Puzzle', jumble: 'Guess the Movie', match: 'Dialogue Match', guess: 'Guess the Actress', eye: 'Guess the Eye' };
-    const icons = { spot: '🧩', jumble: '🎬', match: '💬', guess: '⭐', eye: '👁' };
+    const scorePct = Math.min(100, Math.max(0, (totalScore / MAX_SCORE) * 100));
+    const labels = {
+      spot: 'Shammi Kapoor Puzzle',
+      jumble: 'Guess the Movie',
+      maze: 'Bollywood Maze',
+      guess: 'Guess the Actress',
+      runner: 'Bollywood Star Runner',
+      memory: 'Bollywood Memory Cards',
+      tictactoe: 'Bollywood Tic-Tac-Toe',
+      bigpuzzle: 'Amitabh Mega Puzzle',
+      wordsearch: 'Bollywood Word Search',
+    };
+    const icons = { spot: '🧩', jumble: '🎬', maze: '🗺️', guess: '⭐', runner: '🏃', memory: '🃏', tictactoe: '❌', bigpuzzle: '🎭', wordsearch: '🔍' };
     const statusLabels = {
       solved: { cls: 'solved', text: 'Solved' },
       submitted: { cls: 'skipped', text: 'Submitted' },
@@ -1620,7 +2008,7 @@
             <div class="results-score-ring" style="--score-pct: ${scorePct}">
               <div class="results-score-ring-inner">
                 <span class="results-score-num">${totalScore}</span>
-                <span class="results-score-of">/ 100</span>
+                <span class="results-score-of">/ ${MAX_SCORE}</span>
               </div>
             </div>
             <div class="result-stats">
@@ -1628,14 +2016,14 @@
                 <span class="result-stat-icon" aria-hidden="true">🎯</span>
                 <div class="result-stat-body">
                   <div class="label">Total Score</div>
-                  <div class="value">${totalScore}<span class="value-denom">/100</span></div>
+                  <div class="value">${totalScore}<span class="value-denom">/${MAX_SCORE}</span></div>
                 </div>
               </div>
               <div class="result-stat">
                 <span class="result-stat-icon" aria-hidden="true">✅</span>
                 <div class="result-stat-body">
                   <div class="label">Games Solved</div>
-                  <div class="value">${gameState.gamesCompleted}<span class="value-denom">/5</span></div>
+                  <div class="value">${gameState.gamesCompleted}<span class="value-denom">/${GAME_COUNT}</span></div>
                 </div>
               </div>
               <div class="result-stat">
@@ -1651,7 +2039,7 @@
           <div class="game-breakdown">
             <div class="game-breakdown-head">
               <h3>Challenge Breakdown</h3>
-              <span class="game-breakdown-meta">${gameState.gamesCompleted} of 5 cleared</span>
+              <span class="game-breakdown-meta">${gameState.gamesCompleted} of ${GAME_COUNT} cleared</span>
             </div>
             <div class="breakdown-list">
               ${SECTION_IDS.map(k => {
@@ -1720,11 +2108,11 @@
           <div class="rank-modal-stats-grid">
             <div>
               <div class="stat-label">Score</div>
-              <div class="stat-val">${(currentPlayer.breakdown?.totalScore ?? gameState.totalScore)}/100</div>
+              <div class="stat-val">${(currentPlayer.breakdown?.totalScore ?? gameState.totalScore)}/${MAX_SCORE}</div>
             </div>
             <div>
               <div class="stat-label">Solved</div>
-              <div class="stat-val">${gameState.gamesCompleted}/5</div>
+              <div class="stat-val">${gameState.gamesCompleted}/${GAME_COUNT}</div>
             </div>
             <div>
               <div class="stat-label">Time</div>
@@ -1806,8 +2194,8 @@
             <tr>
               <td><strong>${escapeHtml(p.empName)}</strong></td>
               <td>${escapeHtml(p.empId)}</td>
-              <td><strong style="color:var(--accent-3);">${p.breakdown?.totalScore ?? 0}/100</strong></td>
-              <td>${p.gamesCompleted || 0} / 5</td>
+              <td><strong style="color:var(--accent-3);">${p.breakdown?.totalScore ?? 0}/${MAX_SCORE}</strong></td>
+              <td>${p.gamesCompleted || 0} / ${GAME_COUNT}</td>
               <td>${p.status === 'In Progress' ? '—' : formatTime(p.timeTaken || 0)}</td>
               <td><span class="status-badge ${p.status==='Completed'?'completed':p.status==='Timeout'?'timeout':p.status==='Session Expired'?'expired':'progress'}">${p.status}</span></td>
               <td style="color:var(--text-muted);font-size:12px;">${new Date(p.startedAt).toLocaleString()}</td>
@@ -1859,8 +2247,8 @@
               </td>
               <td><strong>${escapeHtml(p.empName)}</strong></td>
               <td>${escapeHtml(p.empId)}</td>
-              <td><strong style="color:var(--accent-3);">${p.breakdown?.totalScore ?? 0}/100</strong></td>
-              <td><strong>${p.gamesCompleted || 0} / 5</strong></td>
+              <td><strong style="color:var(--accent-3);">${p.breakdown?.totalScore ?? 0}/${MAX_SCORE}</strong></td>
+              <td><strong>${p.gamesCompleted || 0} / ${GAME_COUNT}</strong></td>
               <td><strong>${formatTime(p.timeTaken || 0)}</strong></td>
               <td><span class="status-badge ${p.status==='Completed'?'completed':'timeout'}">${p.status}</span></td>
             </tr>
@@ -1904,6 +2292,7 @@
       if (pwd === 'Admin@1064') {
         close();
         if (gameState && gameState.timerInterval) clearInterval(gameState.timerInterval);
+        stopRunnerLoop();
         document.removeEventListener('keydown', handleMazeKey);
         renderAdmin();
       } else {
