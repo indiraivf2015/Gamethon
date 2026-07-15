@@ -1145,30 +1145,6 @@ h1 {
   min-width: 0;
   flex: 1;
 }
-.arena-head-actions {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 2px;
-}
-.arena-prev-btn {
-  padding: 8px 16px;
-  font-size: 13px;
-  font-weight: 700;
-  white-space: nowrap;
-  border-radius: 999px;
-}
-#skipSectionBtn {
-  border-color: rgba(120, 80, 40, 0.25);
-  color: var(--text-muted);
-  background: rgba(255, 255, 255, 0.7);
-}
-#skipSectionBtn:hover {
-  color: var(--bolly-magenta-dark);
-  border-color: var(--bolly-magenta-dark);
-  background: #fff;
-}
 .arena-main-head .level-tag {
   font-size: 11px;
   font-weight: 700;
@@ -1545,14 +1521,6 @@ h1 {
   transform: scale(1.04);
   border-color: var(--accent) !important;
   box-shadow: 0 0 20px rgba(255, 216, 0, 0.45);
-}
-.puzzle-board--4 {
-  grid-template-columns: repeat(4, 72px);
-  grid-template-rows: repeat(4, 72px);
-}
-.puzzle-tile--4 {
-  width: 72px;
-  height: 72px;
 }
 .puzzle-preview {
   display: flex;
@@ -2806,9 +2774,4 @@ h1 {
   }
   .ttt-cell { font-size: 40px; }
   .wordsearch-layout { grid-template-columns: 1fr; }
-  .puzzle-board--4 {
-    grid-template-columns: repeat(4, 60px);
-    grid-template-rows: repeat(4, 60px);
-  }
-  .puzzle-tile--4 { width: 60px; height: 60px; }
 }

@@ -137,7 +137,7 @@
   const TOTAL_TIME = 20 * 60;
   const POINTS_PER_SECTION = 20;
   const WRONG_PENALTY = 4;
-  const SECTION_IDS = ['spot', 'jumble', 'maze', 'guess', 'runner', 'memory', 'tictactoe', 'bigpuzzle', 'wordsearch'];
+  const SECTION_IDS = ['spot', 'jumble', 'maze', 'guess', 'runner', 'memory', 'tictactoe', 'wordsearch'];
   const GAME_COUNT = SECTION_IDS.length;
   const MAX_SCORE = GAME_COUNT * POINTS_PER_SECTION;
 
@@ -319,7 +319,6 @@
     { id: 'runner', label: 'Star Runner', icon: '🏃' },
     { id: 'memory', label: 'Memory Cards', icon: '🃏' },
     { id: 'tictactoe', label: 'Tic-Tac-Toe', icon: '❌' },
-    { id: 'bigpuzzle', label: 'Amitabh Puzzle', icon: '🎭' },
     { id: 'wordsearch', label: 'Word Search', icon: '🔍' },
   ];
 
@@ -331,7 +330,6 @@
     { icon: '🏃', title: 'Star Runner', desc: 'Dodge barriers and collect Bollywood stars' },
     { icon: '🃏', title: 'Memory Cards', desc: 'Match all four cinema-themed pairs' },
     { icon: '❌', title: 'Tic-Tac-Toe', desc: 'Beat the computer in a classic showdown' },
-    { icon: '🎭', title: 'Amitabh Mega Puzzle', desc: 'Rebuild a 4×4 portrait tile by tile' },
     { icon: '🔍', title: 'Bollywood Word Search', desc: 'Find eight hidden star names in the letter grid' },
   ];
   // ======== GAME 1: SHAMMI KAPOOR PUZZLE ========
@@ -380,10 +378,7 @@
   const RUNNER_TARGET = 15;
   const MEMORY_ICONS = ['🎬', '🍿', '🎵', '⭐'];
 
-  // ======== GAMES 8–9 ========
-  const AMITABH_PHOTO_URL = '/images/amitabh_portrait_1781597390482.jpg';
-  const BIG_PUZZLE_SIZE = 4;
-
+  // ======== GAME 8: WORD SEARCH ========
   const WORDSEARCH_WORDS = [
     { key: 'AMITABH', label: 'Amitabh' },
     { key: 'DEEPIKA', label: 'Deepika' },
@@ -546,7 +541,6 @@
       runner: gameState.breakdown.runner,
       memory: gameState.breakdown.memory,
       tictactoe: gameState.breakdown.tictactoe,
-      bigpuzzle: gameState.breakdown.bigpuzzle,
       wordsearch: gameState.breakdown.wordsearch,
       scores: { ...gameState.sectionScores },
       totalScore: gameState.totalScore,
@@ -560,15 +554,6 @@
 
   function currentGameNum() {
     return gameState.currentGame + 1;
-  }
-
-  function createBigPuzzleGrid() {
-    const size = BIG_PUZZLE_SIZE * BIG_PUZZLE_SIZE;
-    let grid = Array.from({ length: size }, (_, i) => i);
-    do {
-      grid = shuffleArray(grid);
-    } while (grid.every((v, i) => v === i));
-    return grid;
   }
 
   function canPlaceWordSearchWord(grid, word, row, col, dr, dc) {
@@ -705,7 +690,7 @@
           <div class="gamethon-logo gamethon-logo--visual">GAMETHON</div>
           <div class="login-visual-badge">Indira IVF · Culture Club</div>
           <h2>Ready to Play?</h2>
-          <p>Nine blockbuster challenges. Twenty minutes on the clock. Enter your details to join the arena.</p>
+          <p>Eight blockbuster challenges. Twenty minutes on the clock. Enter your details to join the arena.</p>
         </div>
         <div class="login-form-panel">
           <div class="login-form-inner">
@@ -1008,7 +993,7 @@
         </div>
         <div class="start-content">
           <div class="start-section-head">
-            <h2>Nine Challenges</h2>
+            <h2>Eight Challenges</h2>
             <p class="start-score-highlight"><span class="start-score-highlight__icon" aria-hidden="true">🏆</span> <strong>${MAX_SCORE} pts max</strong> · <strong>−${WRONG_PENALTY} per wrong answer</strong></p>
           </div>
           <div class="challenge-grid">
@@ -1092,7 +1077,6 @@
         board: new Array(9).fill(null),
         locked: false,
       },
-      bigpuzzle: { grid: [], selected: null },
       wordsearch: {
         grid: [],
         found: [],
@@ -1109,7 +1093,6 @@
     gameState.spot.grid = p_grid;
 
     gameState.jumble.options = [...ANDHADHUN_POSTER.spellingOptions].sort(() => Math.random() - 0.5);
-    gameState.bigpuzzle.grid = createBigPuzzleGrid();
     const wordBoard = createWordSearchBoard();
     gameState.wordsearch.grid = wordBoard.grid;
     gameState.wordsearch.found = [];
@@ -1153,7 +1136,6 @@
     else if (g === 'runner') renderRunner();
     else if (g === 'memory') renderMemory();
     else if (g === 'tictactoe') renderTicTacToe();
-    else if (g === 'bigpuzzle') renderBigPuzzle();
     else if (g === 'wordsearch') renderWordSearch();
   }
 
@@ -1202,9 +1184,6 @@
                 <h2>${gameTitle}</h2>
                 <div class="sub">${subInfo || ''}</div>
               </div>
-              <div class="arena-head-actions">
-                <button type="button" class="btn-secondary arena-prev-btn" id="skipSectionBtn">Skip</button>
-              </div>
             </div>
           </div>
           <div class="arena-main-body">
@@ -1214,16 +1193,6 @@
   function gameFooter() {
     return `</div></section></div>`;
   }
-
-  function skipCurrentSection() {
-    if (!gameState || gameState.currentGame >= GAME_COUNT) return;
-    if (!confirm('Skip this challenge? You will score 0 points for it.')) return;
-    advanceGame('skipped');
-  }
-
-  app.addEventListener('click', (e) => {
-    if (e.target.closest('#skipSectionBtn')) skipCurrentSection();
-  });
 
   function advanceGame(result) {
     if (!gameState || gameState.currentGame >= GAME_COUNT) return;
@@ -1790,65 +1759,7 @@
     renderTicTacToe();
   }
 
-  // ======== GAME 8: AMITABH 4×4 PUZZLE ========
-  function renderBigPuzzle() {
-    const s = gameState.bigpuzzle;
-    const isSolved = s.grid.every((v, i) => v === i);
-    const step = 100 / (BIG_PUZZLE_SIZE - 1);
-
-    app.innerHTML = gameHeader(currentGameNum(), 'Amitabh Mega Puzzle', isSolved ? 'Portrait complete!' : '16 tiles — take your time!') +
-      (gameState.feedback ? `<div class="feedback ${gameState.feedback.type}">${gameState.feedback.text}</div>` : '') +
-      `<p class="instruction">Swap tiles to rebuild Amitabh Bachchan's portrait. This 4×4 puzzle takes focus and patience.</p>
-      <div class="puzzle-layout">
-        <div class="puzzle-board puzzle-board--4" id="puzzleBoard">
-          ${s.grid.map((originalIdx, currentPos) => {
-            const col = originalIdx % BIG_PUZZLE_SIZE;
-            const row = Math.floor(originalIdx / BIG_PUZZLE_SIZE);
-            const isSelected = s.selected === currentPos;
-            return `
-              <div class="puzzle-tile puzzle-tile--4${isSelected ? ' selected' : ''}" data-pos="${currentPos}" style="
-                background-image: url('${AMITABH_PHOTO_URL}');
-                background-size: 400% 400%;
-                background-position: ${col * step}% ${row * step}%;
-              "></div>
-            `;
-          }).join('')}
-        </div>
-        <div class="puzzle-preview">
-          <div class="puzzle-preview-label">Target</div>
-          <div class="puzzle-preview-img">
-            <img src="${AMITABH_PHOTO_URL}" alt="Target portrait" referrerPolicy="no-referrer">
-          </div>
-          <div class="puzzle-preview-caption">Big B · Legend</div>
-        </div>
-      </div>` + gameFooter();
-
-    document.querySelectorAll('.puzzle-tile').forEach(tile => {
-      tile.addEventListener('click', () => {
-        if (isSolved) return;
-        const pos = parseInt(tile.dataset.pos, 10);
-        if (s.selected === null) {
-          s.selected = pos;
-          renderBigPuzzle();
-        } else {
-          const temp = s.grid[s.selected];
-          s.grid[s.selected] = s.grid[pos];
-          s.grid[pos] = temp;
-          s.selected = null;
-
-          if (s.grid.every((v, i) => v === i)) {
-            gameState.feedback = { type: 'success', text: '🎉 Mega puzzle solved! ' + formatScore(sectionPointsRemaining('bigpuzzle')) + ' pts for this section.' };
-            renderBigPuzzle();
-            setTimeout(() => advanceGame('solved'), 1100);
-            return;
-          }
-          renderBigPuzzle();
-        }
-      });
-    });
-  }
-
-  // ======== GAME 9: BOLLYWOOD WORD SEARCH ========
+  // ======== GAME 8: BOLLYWOOD WORD SEARCH ========
   function renderWordSearch() {
     const ws = gameState.wordsearch;
     const foundCount = ws.found.length;
@@ -1980,10 +1891,9 @@
       runner: 'Bollywood Star Runner',
       memory: 'Bollywood Memory Cards',
       tictactoe: 'Bollywood Tic-Tac-Toe',
-      bigpuzzle: 'Amitabh Mega Puzzle',
       wordsearch: 'Bollywood Word Search',
     };
-    const icons = { spot: '🧩', jumble: '🎬', maze: '🗺️', guess: '⭐', runner: '🏃', memory: '🃏', tictactoe: '❌', bigpuzzle: '🎭', wordsearch: '🔍' };
+    const icons = { spot: '🧩', jumble: '🎬', maze: '🗺️', guess: '⭐', runner: '🏃', memory: '🃏', tictactoe: '❌', wordsearch: '🔍' };
     const statusLabels = {
       solved: { cls: 'solved', text: 'Solved' },
       submitted: { cls: 'skipped', text: 'Submitted' },

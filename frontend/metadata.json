@@ -1,6 +1,6 @@
 {
   "name": "Gamethon - Bollywood Edition",
-  "description": "Interactive nine-stage Bollywood challenge featuring puzzles, quizzes, a maze, star runner, memory cards, tic-tac-toe, and more with an admin dashboard.",
+  "description": "Interactive eight-stage Bollywood challenge featuring puzzles, quizzes, a maze, star runner, memory cards, tic-tac-toe, and word search with an admin dashboard.",
   "requestFramePermissions": [],
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
