@@ -135,9 +135,9 @@
     cachedPlayers = [];
   }
   const TOTAL_TIME = 20 * 60;
-  const POINTS_PER_SECTION = 20;
-  const WRONG_PENALTY = 4;
-  const SECTION_IDS = ['spot', 'jumble', 'maze', 'guess', 'runner', 'memory', 'tictactoe', 'wordsearch'];
+  const POINTS_PER_SECTION = 50;
+  const WRONG_PENALTY = 5;
+  const SECTION_IDS = ['wordsearch', 'crossword', 'sudoku'];
   const GAME_COUNT = SECTION_IDS.length;
   const MAX_SCORE = GAME_COUNT * POINTS_PER_SECTION;
 
@@ -259,8 +259,6 @@
         clearInterval(sessionCheckInterval);
         sessionCheckInterval = null;
         if (gameState && gameState.timerInterval) clearInterval(gameState.timerInterval);
-        stopRunnerLoop();
-        document.removeEventListener('keydown', handleMazeKey);
         showSessionExpiredModal(isEventClosedForPlayer() && eventStatus?.phase === 'after');
       }
     }, 1000);
@@ -312,84 +310,120 @@
   }
 
   const GAME_STEPS = [
-    { id: 'spot', label: 'Shammi Puzzle', icon: '🧩' },
-    { id: 'jumble', label: 'Guess Movie', icon: '🎬' },
-    { id: 'maze', label: 'Bollywood Maze', icon: '🗺️' },
-    { id: 'guess', label: 'Guess Actress', icon: '⭐' },
-    { id: 'runner', label: 'Star Runner', icon: '🏃' },
-    { id: 'memory', label: 'Memory Cards', icon: '🃏' },
-    { id: 'tictactoe', label: 'Tic-Tac-Toe', icon: '❌' },
     { id: 'wordsearch', label: 'Word Search', icon: '🔍' },
+    { id: 'crossword', label: 'Crossword', icon: '✏️' },
+    { id: 'sudoku', label: 'Sudoku', icon: '🔢' },
   ];
 
-  const CHALLENGE_CARDS = [
-    { icon: '🧩', title: 'Shammi Kapoor Puzzle', desc: 'Swap tiles to rebuild the golden-era portrait' },
-    { icon: '🎬', title: 'Guess the Movie', desc: 'Identify the blockbuster from a poster clue' },
-    { icon: '🗺️', title: 'Bollywood Maze', desc: 'Guide the star through the maze to the cinema' },
-    { icon: '⭐', title: 'Guess the Actress', desc: 'Name Bollywood stars from childhood photos' },
-    { icon: '🏃', title: 'Star Runner', desc: 'Dodge barriers and collect Bollywood stars' },
-    { icon: '🃏', title: 'Memory Cards', desc: 'Match all four cinema-themed pairs' },
-    { icon: '❌', title: 'Tic-Tac-Toe', desc: 'Beat the computer in a classic showdown' },
-    { icon: '🔍', title: 'Bollywood Word Search', desc: 'Find eight hidden star names in the letter grid' },
-  ];
-  // ======== GAME 1: SHAMMI KAPOOR PUZZLE ========
-  const SHAMMI_PHOTO_URL = '/images/shammi_portrait_1781674060513.jpg';
-
-  // ======== GAME 2: GUESS THE MOVIE (Poster) ========
-  const ANDHADHUN_POSTER = {
-    image: '/images/andhadhun_poster.png',
-    answer: 'Andhadhun',
-    spellingOptions: [
-      'Andhadhun',
-      'Andhadhoon',
-      'Andhadhan',
-      'Andha Dhun',
-      'Andhadun',
-      'Andh Dhun',
-      'Andhdhun',
-      'Andhadoon',
-      'Andhadhuun',
-      'Andha Dhoon',
-      'Andh-dhun',
-      'Anddhun',
-    ]
+  const GAME_TITLES = {
+    wordsearch: 'Fertility Word Search',
+    crossword: 'Fertility Crossword',
+    sudoku: 'Sudoku',
   };
 
-  // ======== GAME 3: BOLLYWOOD MAZE (Bhooth Bangla) ========
-  const MAZE_GRID = [
-    '###############',
-    '#S..#.....#...#',
-    '#.#.#.###.#.#.#',
-    '#.#...#.#...#.#',
-    '#.#####.#####.#',
-    '#.....#.....#.#',
-    '#####.#.###.#.#',
-    '#...#.#.#.#.#.#',
-    '#.#.#.#.#.#.#.#',
-    '#.#.#...#.#...#',
-    '#.#.#####.###.#',
-    '#.#.......#.#.#',
-    '#.#######.#.#.#',
-    '#.........#..G#',
-    '###############',
+  const CHALLENGE_CARDS = [
+    { icon: '🔍', title: GAME_TITLES.wordsearch, desc: 'Find eight hidden fertility terms in the letter grid' },
+    { icon: '✏️', title: GAME_TITLES.crossword, desc: 'Solve the IVF-themed crossword from the clues' },
+    { icon: '🔢', title: GAME_TITLES.sudoku, desc: 'Fill the 9×9 grid so every row, column and box has 1–9' },
   ];
 
-  // ======== GAMES 5–7 ========
-  const RUNNER_TARGET = 15;
-  const MEMORY_ICONS = ['🎬', '🍿', '🎵', '⭐'];
-
-  // ======== GAME 8: WORD SEARCH ========
+  // ======== GAME 1: FERTILITY WORD SEARCH ========
   const WORDSEARCH_WORDS = [
-    { key: 'AMITABH', label: 'Amitabh' },
-    { key: 'DEEPIKA', label: 'Deepika' },
-    { key: 'KAREENA', label: 'Kareena' },
-    { key: 'MADHURI', label: 'Madhuri' },
-    { key: 'SALMAN', label: 'Salman' },
-    { key: 'REKHA', label: 'Rekha' },
-    { key: 'RAJKAPOOR', label: 'Raj Kapoor' },
-    { key: 'SRIDEVI', label: 'Sridevi' },
+    { key: 'EMBRYO', label: 'Embryo' },
+    { key: 'OVARY', label: 'Ovary' },
+    { key: 'SPERM', label: 'Sperm' },
+    { key: 'UTERUS', label: 'Uterus' },
+    { key: 'ZYGOTE', label: 'Zygote' },
+    { key: 'FOLLICLE', label: 'Follicle' },
+    { key: 'PLACENTA', label: 'Placenta' },
+    { key: 'HORMONE', label: 'Hormone' },
   ];
   const WORDSEARCH_SIZE = 14;
+
+  // ======== GAME 2: FERTILITY CROSSWORD ========
+  // Layout generated and verified offline; row/col are 0-indexed on an 11×11 grid.
+  const CROSSWORD_SIZE = 11;
+  const CROSSWORD_WORDS = [
+    { answer: 'BLASTOCYST', row: 0, col: 1, dir: 'across', clue: 'Embryo stage reached around day 5 of development' },
+    { answer: 'IVF', row: 2, col: 2, dir: 'across', clue: 'Treatment where eggs are fertilised in a lab (abbr.)' },
+    { answer: 'TRIMESTER', row: 5, col: 0, dir: 'across', clue: 'One of the three stages of pregnancy' },
+    { answer: 'FALLOPIAN', row: 7, col: 2, dir: 'across', clue: '___ tube: where egg and sperm naturally meet' },
+    { answer: 'OVULATION', row: 0, col: 6, dir: 'down', clue: 'Release of a mature egg from the ovary' },
+    { answer: 'ICSI', row: 2, col: 2, dir: 'down', clue: 'Injecting a single sperm directly into an egg (abbr.)' },
+    { answer: 'ESTROGEN', row: 3, col: 0, dir: 'down', clue: 'Key female hormone that thickens the uterine lining' },
+    { answer: 'CERVIX', row: 3, col: 8, dir: 'down', clue: 'Lower, narrow end of the uterus' },
+  ];
+
+  function buildCrosswordLayout() {
+    const cells = {};
+    CROSSWORD_WORDS.forEach((word, wi) => {
+      const [dr, dc] = word.dir === 'across' ? [0, 1] : [1, 0];
+      [...word.answer].forEach((ch, i) => {
+        const key = `${word.row + dr * i},${word.col + dc * i}`;
+        if (cells[key] && cells[key].letter !== ch) {
+          throw new Error(`Crossword conflict at ${key}`);
+        }
+        cells[key] = cells[key] || { letter: ch, words: [] };
+        cells[key].words.push(wi);
+      });
+    });
+    // Standard numbering: scan row-major, number each cell that starts a word.
+    const numbers = {};
+    let n = 0;
+    for (let r = 0; r < CROSSWORD_SIZE; r++) {
+      for (let c = 0; c < CROSSWORD_SIZE; c++) {
+        if (CROSSWORD_WORDS.some(w => w.row === r && w.col === c)) numbers[`${r},${c}`] = ++n;
+      }
+    }
+    const words = CROSSWORD_WORDS.map(w => ({ ...w, number: numbers[`${w.row},${w.col}`] }));
+    return { cells, numbers, words };
+  }
+  const CROSSWORD_LAYOUT = buildCrosswordLayout();
+
+  function createCrosswordState() {
+    return {
+      entries: {},
+      solvedWords: [],
+      wrongCells: [],
+      activeWord: 0,
+    };
+  }
+
+  // ======== GAME 3: SUDOKU ========
+  // A fresh valid grid per game: shuffle bands/rows/stacks/cols and digits of a base pattern.
+  // Answers are judged by Sudoku rules, not against one stored solution, so a puzzle
+  // with more than one valid completion still accepts any of them.
+  const SUDOKU_BLANKS = 36; // 45 givens: an easy puzzle that fits the time limit
+
+  function sudokuShuffle(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function generateSudokuGivens() {
+    const trio = [0, 1, 2];
+    const rows = sudokuShuffle(trio).flatMap(band => sudokuShuffle(trio).map(r => band * 3 + r));
+    const cols = sudokuShuffle(trio).flatMap(stack => sudokuShuffle(trio).map(c => stack * 3 + c));
+    const digits = sudokuShuffle([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    const pattern = (r, c) => (3 * (r % 3) + Math.floor(r / 3) + c) % 9;
+    const grid = rows.map(r => cols.map(c => digits[pattern(r, c)]));
+    sudokuShuffle([...Array(81).keys()]).slice(0, SUDOKU_BLANKS).forEach(i => {
+      grid[Math.floor(i / 9)][i % 9] = 0;
+    });
+    return grid;
+  }
+
+  function createSudokuState() {
+    return {
+      givens: generateSudokuGivens(), // 0 = blank square for the player
+      entries: {},                    // "r,c" -> digit typed by the player
+      wrongCells: [],
+    };
+  }
 
   function shuffleArray(items) {
     const arr = [...items];
@@ -399,40 +433,6 @@
     }
     return arr;
   }
-
-  // ======== GAME 4: GUESS THE ACTRESS ========
-  const GUESS_ACTRESS_NAMES = [
-    'Hema Malini',
-    'Rekha',
-    'Jaya Bachchan',
-    'Sharmila Tagore',
-    'Zeenat Aman',
-    'Parveen Babi',
-    'Rakhee',
-    'Mumtaz',
-    'Urmila Matondkar',
-    'Deepika Padukone',
-    'Alia Bhatt',
-  ];
-
-  const GUESS_ROUNDS = [
-    {
-      photo: '/images/alia_bhatt_child_1781675438578.jpg',
-      answer: 'Alia Bhatt',
-      hint: 'Bollywood superstar — from Student of the Year to Raazi and Gangubai Kathiawadi!',
-    },
-    {
-      photo: '/images/urmila_matondkar_child.png',
-      answer: 'Urmila Matondkar',
-      hint: 'Queen of versatility — child artist in Masoom, later star of Rangeela and Chandni Bar!',
-    },
-    {
-      photo: '/images/deepika_child_1781675460296.jpg',
-      answer: 'Deepika Padukone',
-      photoClass: 'guess-photo--no-label',
-      hint: 'Global superstar — from Om Shanti Om and Chennai Express to Padmaavat and Pathaan!',
-    },
-  ];
 
   // ======== API / DATA ========
   async function loadData() {
@@ -534,14 +534,9 @@
 
   function buildBreakdownPayload() {
     return {
-      spot: gameState.breakdown.spot,
-      jumble: gameState.breakdown.jumble,
-      maze: gameState.breakdown.maze,
-      guess: gameState.breakdown.guess,
-      runner: gameState.breakdown.runner,
-      memory: gameState.breakdown.memory,
-      tictactoe: gameState.breakdown.tictactoe,
       wordsearch: gameState.breakdown.wordsearch,
+      crossword: gameState.breakdown.crossword,
+      sudoku: gameState.breakdown.sudoku,
       scores: { ...gameState.sectionScores },
       totalScore: gameState.totalScore,
       wrongCounts: { ...gameState.wrongCounts },
@@ -993,7 +988,7 @@
         </div>
         <div class="start-content">
           <div class="start-section-head">
-            <h2>Eight Challenges</h2>
+            <h2>Three Challenges</h2>
             <p class="start-score-highlight"><span class="start-score-highlight__icon" aria-hidden="true">🏆</span> <strong>${MAX_SCORE} pts max</strong> · <strong>−${WRONG_PENALTY} per wrong answer</strong></p>
           </div>
           <div class="challenge-grid">
@@ -1008,7 +1003,7 @@
             `).join('')}
           </div>
           <div class="start-actions">
-            <p class="start-rules"><strong>20 pts</strong> per challenge · <strong>−4</strong> per wrong answer</p>
+            <p class="start-rules"><strong>${POINTS_PER_SECTION} pts</strong> per challenge · <strong>−${WRONG_PENALTY}</strong> per wrong answer</p>
             <button class="start-btn" id="startBtn">Start Game</button>
           </div>
         </div>
@@ -1055,44 +1050,16 @@
       breakdown: Object.fromEntries(SECTION_IDS.map(id => [id, 'pending'])),
       feedback: null,
       // Per-game state
-      spot: { grid: [], selected: null },
-      jumble: { chosen: null, options: [] },
-      maze: { row: 1, col: 1, moves: 0, solved: false },
-      guess: { currentRound: 0, chosen: null, hintShown: false, options: shuffleArray(GUESS_ACTRESS_NAMES) },
-      runner: {
-        lane: 1,
-        objects: [],
-        collected: 0,
-        tick: 0,
-        running: false,
-        completed: false,
-        loop: null,
-      },
-      memory: {
-        cards: shuffleArray([...MEMORY_ICONS, ...MEMORY_ICONS]).map((icon, id) => ({ id, icon, matched: false })),
-        open: [],
-        locked: false,
-      },
-      tictactoe: {
-        board: new Array(9).fill(null),
-        locked: false,
-      },
       wordsearch: {
         grid: [],
         found: [],
         activeCells: [],
         anchor: null,
       },
+      crossword: createCrosswordState(),
+      sudoku: createSudokuState(),
     };
-    
-    // Shuffle Game 1 pieces until not fully solved
-    let p_grid = [0, 1, 2, 3, 4, 5, 6, 7, 8];
-    do {
-      p_grid.sort(() => Math.random() - 0.5);
-    } while (p_grid.every((v, i) => v === i));
-    gameState.spot.grid = p_grid;
 
-    gameState.jumble.options = [...ANDHADHUN_POSTER.spellingOptions].sort(() => Math.random() - 0.5);
     const wordBoard = createWordSearchBoard();
     gameState.wordsearch.grid = wordBoard.grid;
     gameState.wordsearch.found = [];
@@ -1101,7 +1068,6 @@
     
     gameState.timerInterval = setInterval(tickTimer, 1000);
     renderCurrentGame();
-    document.addEventListener('keydown', handleMazeKey);
   }
 
   function tickTimer() {
@@ -1129,14 +1095,9 @@
     const games = SECTION_IDS;
     const g = games[gameState.currentGame];
     if (!g) { endGame('Completed'); return; }
-    if (g === 'spot') renderSpot();
-    else if (g === 'jumble') renderJumble();
-    else if (g === 'maze') renderMaze();
-    else if (g === 'guess') renderGuess();
-    else if (g === 'runner') renderRunner();
-    else if (g === 'memory') renderMemory();
-    else if (g === 'tictactoe') renderTicTacToe();
-    else if (g === 'wordsearch') renderWordSearch();
+    if (g === 'wordsearch') renderWordSearch();
+    else if (g === 'crossword') renderCrossword();
+    else if (g === 'sudoku') renderSudoku();
   }
 
   function gameHeader(gameNum, gameTitle, subInfo) {
@@ -1199,7 +1160,6 @@
     const games = SECTION_IDS;
     const sectionIndex = gameState.currentGame;
     const g = games[sectionIndex];
-    if (g === 'runner') stopRunnerLoop();
     finalizeSectionScore(g, result);
     gameState.breakdown[g] = result;
     if (result === 'solved') gameState.gamesCompleted++;
@@ -1213,561 +1173,15 @@
     renderCurrentGame();
   }
 
-  // ======== GAME 1: SHAMMI KAPOOR PUZZLE ========
-  function renderSpot() {
-    const s = gameState.spot;
-    const isSolved = s.grid.every((v, i) => v === i);
-    
-    app.innerHTML = gameHeader(currentGameNum(), 'Shammi Kapoor Puzzle', isSolved ? 'Portrait complete!' : 'Arrange the tiles to rebuild the portrait') +
-      (gameState.feedback ? `<div class="feedback ${gameState.feedback.type}">${gameState.feedback.text}</div>` : '') +
-      `<p class="instruction">Tap a tile to select it, then tap another to swap. Reconstruct Shammi Kapoor's portrait!</p>
-      <div class="puzzle-layout">
-        <div class="puzzle-board" id="puzzleBoard">
-          ${s.grid.map((originalIdx, currentPos) => {
-            const col = originalIdx % 3;
-            const row = Math.floor(originalIdx / 3);
-            const isSelected = s.selected === currentPos;
-            return `
-              <div class="puzzle-tile${isSelected ? ' selected' : ''}" data-pos="${currentPos}" style="
-                background-image: url('${SHAMMI_PHOTO_URL}');
-                background-size: 300% 300%;
-                background-position: ${col * 50}% ${row * 50}%;
-              "></div>
-            `;
-          }).join('')}
-        </div>
-        <div class="puzzle-preview">
-          <div class="puzzle-preview-label">Target</div>
-          <div class="puzzle-preview-img">
-            <img src="${SHAMMI_PHOTO_URL}" alt="Target portrait" referrerPolicy="no-referrer">
-          </div>
-          <div class="puzzle-preview-caption">Golden Era Legend</div>
-        </div>
-      </div>` + gameFooter();
-
-    document.querySelectorAll('.puzzle-tile').forEach(tile => {
-      tile.addEventListener('click', () => {
-        if (isSolved) return;
-        const pos = parseInt(tile.dataset.pos);
-        if (s.selected === null) {
-          s.selected = pos;
-          renderSpot();
-        } else {
-          const temp = s.grid[s.selected];
-          s.grid[s.selected] = s.grid[pos];
-          s.grid[pos] = temp;
-          s.selected = null;
-          
-          if (s.grid.every((v, i) => v === i)) {
-            gameState.feedback = { type: 'success', text: '🎉 Brilliant! Portrait complete! ' + formatScore(sectionPointsRemaining('spot')) + ' pts for this section.' };
-            renderSpot();
-            setTimeout(() => advanceGame('solved'), 1100);
-            return;
-          }
-          renderSpot();
-        }
-      });
-    });
-
-  }
-
-  // ======== GAME 2: GUESS THE MOVIE (Poster) ========
-  function renderJumble() {
-    const r = gameState.jumble;
-    const finished = r.chosen !== null;
-    const isCorrect = finished && r.chosen === ANDHADHUN_POSTER.answer;
-
-    app.innerHTML = gameHeader(currentGameNum(), 'Guess the Movie', 'Identify the blockbuster from the poster clue') +
-      (gameState.feedback ? `<div class="feedback ${gameState.feedback.type}">${gameState.feedback.text}</div>` : '') +
-      `<p class="instruction">Study the poster below and pick the <strong>correct spelling</strong> of the movie name.</p>
-      <div class="game-panel">
-        <div class="media-frame">
-          <img src="${ANDHADHUN_POSTER.image}" alt="Movie poster clue">
-        </div>
-        <div class="game-panel-title">Select the correct spelling</div>
-        <div class="options-grid cols-3">
-          ${r.options.map(opt => {
-            let btnCls = 'match-item';
-            if (finished) {
-              if (isCorrect && opt === r.chosen) btnCls += ' matched';
-              else if (!isCorrect && opt === r.chosen) btnCls += ' wrong';
-              else btnCls += ' disabled';
-            }
-            return `<div class="${btnCls}" data-opt="${opt}">${opt}</div>`;
-          }).join('')}
-        </div>
-      </div>` + gameFooter();
-
-    document.querySelectorAll('[data-opt]').forEach(item => {
-      item.addEventListener('click', () => {
-        if (finished) return;
-        const choice = item.dataset.opt;
-        r.chosen = choice;
-
-        if (choice === ANDHADHUN_POSTER.answer) {
-          gameState.feedback = { type: 'success', text: '🎉 Correct! ' + formatScore(sectionPointsRemaining('jumble')) + ' pts for this section.' };
-          renderJumble();
-          setTimeout(() => advanceGame('solved'), 1100);
-        } else {
-          applyWrongPenalty('jumble');
-          gameState.feedback = wrongAnswerFeedback('jumble');
-          renderJumble();
-          setTimeout(() => {
-            r.chosen = null;
-            gameState.feedback = null;
-            renderJumble();
-          }, 1500);
-        }
-      });
-    });
-
-  }
-
-  // ======== GAME 3: BOLLYWOOD MAZE ========
-  function renderMaze() {
-    const maze = gameState.maze;
-    const cells = MAZE_GRID.flatMap((row, rowIndex) =>
-      [...row].map((cell, colIndex) => {
-        const isPlayer = maze.row === rowIndex && maze.col === colIndex;
-        let className = 'maze-cell';
-        let content = '';
-        if (cell === '#') className += ' maze-wall';
-        else className += ' maze-path';
-        if (cell === 'G') {
-          className += ' maze-goal';
-          content = '🎦';
-        }
-        if (isPlayer) {
-          className += ' maze-player';
-          content = '⭐';
-        }
-        return `<div class="${className}" aria-hidden="true">${content}</div>`;
-      })
-    ).join('');
-
-    app.innerHTML = gameHeader(currentGameNum(), 'Bollywood Maze', `${maze.moves} moves`) +
-      (gameState.feedback ? `<div class="feedback ${gameState.feedback.type}">${gameState.feedback.text}</div>` : '') +
-      `<p class="instruction">Guide the star ⭐ to the cinema 🎦 using the arrow keys or controls.</p>
-      <div class="arcade-layout">
-        <div class="arcade-playfield">
-          <div class="maze-board" role="img" aria-label="Maze puzzle">${cells}</div>
-          ${directionControls('maze')}
-        </div>
-      </div>` + gameFooter();
-
-    bindDirectionControls('maze');
-  }
-
-  function moveMaze(dx, dy) {
-    if (!gameState || currentSectionId() !== 'maze' || gameState.maze.solved) return;
-    const maze = gameState.maze;
-    const nextRow = maze.row + dy;
-    const nextCol = maze.col + dx;
-    const target = MAZE_GRID[nextRow]?.[nextCol];
-    if (!target || target === '#') {
-      return;
-    }
-
-    maze.row = nextRow;
-    maze.col = nextCol;
-    maze.moves++;
-    gameState.feedback = null;
-    if (target === 'G') {
-      maze.solved = true;
-      gameState.feedback = { type: 'success', text: `🎉 Maze solved in ${maze.moves} moves! ${formatScore(sectionPointsRemaining('maze'))} pts.` };
-      renderMaze();
-      const sectionIndex = gameState.currentGame;
-      setTimeout(() => {
-        if (gameState?.currentGame === sectionIndex) advanceGame('solved');
-      }, 900);
-      return;
-    }
-    renderMaze();
-  }
-
-  // ======== GAME 4: GUESS THE ACTRESS ========
-  function renderGuess() {
-    const gs = gameState.guess;
-    const round = GUESS_ROUNDS[gs.currentRound];
-    const isFinished = gs.chosen !== null;
-    const isCorrect = isFinished && gs.chosen === round.answer;
-
-    app.innerHTML = gameHeader(currentGameNum(), 'Guess the Actress', `Round ${gs.currentRound + 1} of ${GUESS_ROUNDS.length}`) +
-      (gameState.feedback ? `<div class="feedback ${gameState.feedback.type}">${gameState.feedback.text}</div>` : '') +
-      `<p class="instruction">Examine the childhood photo and identify the Bollywood superstar.</p>
-      <div class="game-panel">
-        <div class="media-frame portrait${round.photoClass ? ' ' + round.photoClass : ''}">
-          <img src="${round.photo}" alt="Childhood photo" referrerPolicy="no-referrer">
-        </div>
-        <div id="hintBox">
-          ${gs.hintShown
-            ? `<div class="hint-box">Hint: ${round.hint}</div>`
-            : `<button class="btn-secondary" id="hintBtn">Show Hint</button>`
-          }
-        </div>
-        <div class="game-panel-title">Who is she?</div>
-        <div class="options-grid cols-3">
-          ${gs.options.map(opt => {
-            let btnClass = 'match-item';
-            if (isFinished) {
-              if (isCorrect && opt === gs.chosen) btnClass += ' matched';
-              else if (!isCorrect && opt === gs.chosen) btnClass += ' wrong';
-              else btnClass += ' disabled';
-            }
-            return `<div class="${btnClass}" data-opt="${opt}">${opt}</div>`;
-          }).join('')}
-        </div>
-      </div>` + gameFooter();
-
-    if (!isFinished) {
-      document.querySelectorAll('.game-panel .match-item').forEach(item => {
-        item.addEventListener('click', () => {
-          const selected = item.dataset.opt;
-          gs.chosen = selected;
-          if (selected === round.answer) {
-            gameState.feedback = { type: 'success', text: '🎉 Correct!' };
-            renderGuess();
-            setTimeout(() => {
-              gameState.feedback = null;
-              if (gs.currentRound + 1 < GUESS_ROUNDS.length) {
-                gs.currentRound++;
-                gs.chosen = null;
-                gs.hintShown = false;
-                gs.options = shuffleArray(GUESS_ACTRESS_NAMES);
-                renderGuess();
-              } else {
-                advanceGame('solved');
-              }
-            }, 1200);
-          } else {
-            applyWrongPenalty('guess');
-            gameState.feedback = wrongAnswerFeedback('guess');
-            renderGuess();
-            setTimeout(() => {
-              gs.chosen = null;
-              gameState.feedback = null;
-              renderGuess();
-            }, 1200);
-          }
-        });
-      });
-
-      const hintBtn = document.getElementById('hintBtn');
-      if (hintBtn) {
-        hintBtn.addEventListener('click', () => {
-          gs.hintShown = true;
-          renderGuess();
-        });
-      }
-    }
-
-  }
-
-  function directionControls(game) {
-    return `
-      <div class="arcade-controls" aria-label="Direction controls">
-        <button type="button" class="arcade-control arcade-control--up" data-game="${game}" data-direction="up" aria-label="Move up">▲</button>
-        <button type="button" class="arcade-control arcade-control--left" data-game="${game}" data-direction="left" aria-label="Move left">◀</button>
-        <button type="button" class="arcade-control arcade-control--down" data-game="${game}" data-direction="down" aria-label="Move down">▼</button>
-        <button type="button" class="arcade-control arcade-control--right" data-game="${game}" data-direction="right" aria-label="Move right">▶</button>
-      </div>`;
-  }
-
-  function directionVector(direction) {
-    return {
-      up: { x: 0, y: -1 },
-      down: { x: 0, y: 1 },
-      left: { x: -1, y: 0 },
-      right: { x: 1, y: 0 },
-    }[direction];
-  }
-
-  function bindDirectionControls(game) {
-    document.querySelectorAll(`[data-game="${game}"][data-direction]`).forEach(button => {
-      button.addEventListener('click', () => {
-        const vector = directionVector(button.dataset.direction);
-        if (game === 'maze') moveMaze(vector.x, vector.y);
-      });
-    });
-  }
-
-  function handleMazeKey(event) {
-    const keyDirections = {
-      ArrowUp: 'up', w: 'up', W: 'up',
-      ArrowDown: 'down', s: 'down', S: 'down',
-      ArrowLeft: 'left', a: 'left', A: 'left',
-      ArrowRight: 'right', d: 'right', D: 'right',
-    };
-    const direction = keyDirections[event.key];
-    if (!direction || !gameState) return;
-    const section = currentSectionId();
-    if (section !== 'maze' && section !== 'runner') return;
-    event.preventDefault();
-    const vector = directionVector(direction);
-    if (section === 'maze') moveMaze(vector.x, vector.y);
-    else if (vector.x) moveRunner(vector.x);
-  }
-
-  // ======== GAME 5: STAR RUNNER ========
-  function runnerCellsHtml() {
-    const runner = gameState.runner;
-    const objects = new Map(runner.objects.map(item => [`${item.lane},${item.row}`, item.type]));
-    let html = '';
-    for (let row = 0; row < 6; row++) {
-      for (let lane = 0; lane < 3; lane++) {
-        const type = objects.get(`${lane},${row}`);
-        const isPlayer = row === 5 && lane === runner.lane;
-        const content = isPlayer ? '🏃' : type === 'star' ? '⭐' : type === 'barrier' ? '🚧' : '';
-        const cls = isPlayer ? ' runner-player' : type ? ` runner-${type}` : '';
-        html += `<div class="runner-cell${cls}">${content}</div>`;
-      }
-    }
-    return html;
-  }
-
-  function renderRunner() {
-    const runner = gameState.runner;
-    app.innerHTML = gameHeader(currentGameNum(), 'Bollywood Star Runner', `${runner.collected} of ${RUNNER_TARGET} stars collected`) +
-      (gameState.feedback ? `<div class="feedback ${gameState.feedback.type}">${gameState.feedback.text}</div>` : '') +
-      `<p class="instruction">Move left and right to collect stars ⭐ and dodge barriers 🚧.</p>
-      <div class="runner-layout">
-        <div class="runner-score">Stars: <strong id="runnerCollected">${runner.collected} / ${RUNNER_TARGET}</strong></div>
-        <div class="runner-road" id="runnerRoad">${runnerCellsHtml()}</div>
-        <div class="runner-controls">
-          <button type="button" class="arcade-control" id="runnerLeft" aria-label="Move left">◀</button>
-          ${runner.running || runner.completed ? '' : '<button type="button" class="btn-primary runner-start" id="runnerStart">Start Run</button>'}
-          <button type="button" class="arcade-control" id="runnerRight" aria-label="Move right">▶</button>
-        </div>
-      </div>` + gameFooter();
-
-    document.getElementById('runnerLeft')?.addEventListener('click', () => moveRunner(-1));
-    document.getElementById('runnerRight')?.addEventListener('click', () => moveRunner(1));
-    document.getElementById('runnerStart')?.addEventListener('click', startRunner);
-  }
-
-  function startRunner() {
-    if (!gameState || currentSectionId() !== 'runner' || gameState.runner.running) return;
-    gameState.runner.running = true;
-    gameState.feedback = null;
-    gameState.runner.loop = setInterval(stepRunner, 360);
-    renderRunner();
-  }
-
-  function stopRunnerLoop() {
-    if (gameState?.runner?.loop) clearInterval(gameState.runner.loop);
-    if (gameState?.runner) {
-      gameState.runner.loop = null;
-      gameState.runner.running = false;
-    }
-  }
-
-  function moveRunner(delta) {
-    if (!gameState || currentSectionId() !== 'runner') return;
-    const runner = gameState.runner;
-    runner.lane = Math.max(0, Math.min(2, runner.lane + delta));
-    updateRunnerBoard();
-  }
-
-  function updateRunnerBoard() {
-    const road = document.getElementById('runnerRoad');
-    if (road) road.innerHTML = runnerCellsHtml();
-    const score = document.getElementById('runnerCollected');
-    if (score) score.textContent = `${gameState.runner.collected} / ${RUNNER_TARGET}`;
-  }
-
-  function stepRunner() {
-    if (!gameState || currentSectionId() !== 'runner') {
-      stopRunnerLoop();
-      return;
-    }
-    const runner = gameState.runner;
-    runner.tick++;
-    runner.objects = runner.objects
-      .map(item => ({ ...item, row: item.row + 1 }))
-      .filter(item => item.row < 6);
-
-    const collision = runner.objects.find(item => item.row === 5 && item.lane === runner.lane);
-    if (collision) {
-      runner.objects = runner.objects.filter(item => item !== collision);
-      if (collision.type === 'star') {
-        runner.collected++;
-      } else {
-        applyWrongPenalty('runner');
-        gameState.feedback = { type: 'error', text: `Barrier hit! −${WRONG_PENALTY} points.` };
-        renderRunner();
-      }
-    }
-
-    if (runner.collected >= RUNNER_TARGET) {
-      stopRunnerLoop();
-      runner.completed = true;
-      gameState.feedback = { type: 'success', text: `🎉 Run complete! ${formatScore(sectionPointsRemaining('runner'))} pts.` };
-      renderRunner();
-      const sectionIndex = gameState.currentGame;
-      setTimeout(() => {
-        if (gameState?.currentGame === sectionIndex) advanceGame('solved');
-      }, 900);
-      return;
-    }
-
-    if (runner.tick % 2 === 0) {
-      runner.objects.push({
-        lane: Math.floor(Math.random() * 3),
-        row: 0,
-        type: Math.random() < 0.72 ? 'star' : 'barrier',
-      });
-    }
-    updateRunnerBoard();
-  }
-
-  // ======== GAME 6: MEMORY CARDS ========
-  function renderMemory() {
-    const memory = gameState.memory;
-    app.innerHTML = gameHeader(currentGameNum(), 'Bollywood Memory Cards', `${memory.cards.filter(card => card.matched).length / 2} of ${MEMORY_ICONS.length} pairs`) +
-      (gameState.feedback ? `<div class="feedback ${gameState.feedback.type}">${gameState.feedback.text}</div>` : '') +
-      `<p class="instruction">Flip two cards and match all four cinema-themed pairs.</p>
-      <div class="memory-grid">
-        ${memory.cards.map(card => {
-          const visible = card.matched || memory.open.includes(card.id);
-          return `<button type="button" class="memory-card${visible ? ' is-flipped' : ''}${card.matched ? ' is-matched' : ''}" data-memory-id="${card.id}" ${memory.locked || card.matched ? 'disabled' : ''}>
-            <span class="memory-card-inner"><span class="memory-back">?</span><span class="memory-face">${card.icon}</span></span>
-          </button>`;
-        }).join('')}
-      </div>` + gameFooter();
-
-    document.querySelectorAll('[data-memory-id]').forEach(card => {
-      card.addEventListener('click', () => flipMemoryCard(Number(card.dataset.memoryId)));
-    });
-  }
-
-  function flipMemoryCard(id) {
-    const memory = gameState.memory;
-    if (memory.locked || memory.open.includes(id)) return;
-    memory.open.push(id);
-    if (memory.open.length < 2) {
-      renderMemory();
-      return;
-    }
-
-    memory.locked = true;
-    const [firstId, secondId] = memory.open;
-    const first = memory.cards.find(card => card.id === firstId);
-    const second = memory.cards.find(card => card.id === secondId);
-    if (first.icon === second.icon) {
-      first.matched = true;
-      second.matched = true;
-      memory.open = [];
-      memory.locked = false;
-      const complete = memory.cards.every(card => card.matched);
-      gameState.feedback = complete ? { type: 'success', text: `🎉 All pairs matched! ${formatScore(sectionPointsRemaining('memory'))} pts.` } : null;
-      renderMemory();
-      if (complete) {
-        const sectionIndex = gameState.currentGame;
-        setTimeout(() => {
-          if (gameState?.currentGame === sectionIndex) advanceGame('solved');
-        }, 900);
-      }
-      return;
-    }
-
-    applyWrongPenalty('memory');
-    gameState.feedback = wrongAnswerFeedback('memory');
-    renderMemory();
-    const sectionIndex = gameState.currentGame;
-    setTimeout(() => {
-      if (!gameState || gameState.currentGame !== sectionIndex) return;
-      memory.open = [];
-      memory.locked = false;
-      gameState.feedback = null;
-      renderMemory();
-    }, 850);
-  }
-
-  // ======== GAME 7: TIC-TAC-TOE ========
-  const TTT_WINS = [
-    [0, 1, 2], [3, 4, 5], [6, 7, 8],
-    [0, 3, 6], [1, 4, 7], [2, 5, 8],
-    [0, 4, 8], [2, 4, 6],
-  ];
-
-  function ticTacToeWinner(board) {
-    for (const [a, b, c] of TTT_WINS) {
-      if (board[a] && board[a] === board[b] && board[a] === board[c]) return board[a];
-    }
-    return board.every(Boolean) ? 'draw' : null;
-  }
-
-  function renderTicTacToe() {
-    const ttt = gameState.tictactoe;
-    app.innerHTML = gameHeader(currentGameNum(), 'Bollywood Tic-Tac-Toe', 'You are X · beat the computer') +
-      (gameState.feedback ? `<div class="feedback ${gameState.feedback.type}">${gameState.feedback.text}</div>` : '') +
-      `<p class="instruction">Place three X marks in a row before the computer places three O marks.</p>
-      <div class="ttt-board">
-        ${ttt.board.map((cell, index) => `<button type="button" class="ttt-cell ${cell ? `ttt-${cell.toLowerCase()}` : ''}" data-ttt="${index}" ${cell || ttt.locked ? 'disabled' : ''}>${cell || ''}</button>`).join('')}
-      </div>` + gameFooter();
-
-    document.querySelectorAll('[data-ttt]').forEach(cell => {
-      cell.addEventListener('click', () => playTicTacToe(Number(cell.dataset.ttt)));
-    });
-  }
-
-  function resetTicTacToe(message) {
-    setTimeout(() => {
-      if (!gameState || currentSectionId() !== 'tictactoe') return;
-      gameState.tictactoe.board = new Array(9).fill(null);
-      gameState.tictactoe.locked = false;
-      gameState.feedback = message ? { type: 'info', text: message } : null;
-      renderTicTacToe();
-    }, 900);
-  }
-
-  function playTicTacToe(index) {
-    const ttt = gameState.tictactoe;
-    if (ttt.locked || ttt.board[index]) return;
-    ttt.board[index] = 'X';
-    let winner = ticTacToeWinner(ttt.board);
-    if (winner === 'X') {
-      ttt.locked = true;
-      gameState.feedback = { type: 'success', text: `🎉 You won! ${formatScore(sectionPointsRemaining('tictactoe'))} pts.` };
-      renderTicTacToe();
-      const sectionIndex = gameState.currentGame;
-      setTimeout(() => {
-        if (gameState?.currentGame === sectionIndex) advanceGame('solved');
-      }, 900);
-      return;
-    }
-    if (winner === 'draw') {
-      ttt.locked = true;
-      applyWrongPenalty('tictactoe');
-      gameState.feedback = { type: 'error', text: `Draw! −${WRONG_PENALTY} points. New board starting…` };
-      renderTicTacToe();
-      resetTicTacToe();
-      return;
-    }
-
-    const open = ttt.board.map((cell, i) => cell ? null : i).filter(i => i !== null);
-    ttt.board[open[Math.floor(Math.random() * open.length)]] = 'O';
-    winner = ticTacToeWinner(ttt.board);
-    if (winner === 'O' || winner === 'draw') {
-      ttt.locked = true;
-      applyWrongPenalty('tictactoe');
-      gameState.feedback = { type: 'error', text: `${winner === 'O' ? 'Computer won' : 'Draw'}! −${WRONG_PENALTY} points. New board starting…` };
-      renderTicTacToe();
-      resetTicTacToe();
-      return;
-    }
-    renderTicTacToe();
-  }
-
-  // ======== GAME 8: BOLLYWOOD WORD SEARCH ========
+  // ======== GAME 1: FERTILITY WORD SEARCH ========
   function renderWordSearch() {
     const ws = gameState.wordsearch;
     const foundCount = ws.found.length;
     const totalWords = WORDSEARCH_WORDS.length;
 
-    app.innerHTML = gameHeader(currentGameNum(), 'Bollywood Word Search', `${foundCount} of ${totalWords} names found`) +
+    app.innerHTML = gameHeader(currentGameNum(), GAME_TITLES.wordsearch, `${foundCount} of ${totalWords} terms found`) +
       (gameState.feedback ? `<div class="feedback ${gameState.feedback.type}">${gameState.feedback.text}</div>` : '') +
-      `<p class="instruction">Click the first letter, then the last letter of a hidden name (straight lines only). Find all eight stars!</p>
+      `<p class="instruction">Click the first letter, then the last letter of a hidden term (straight lines only). Find all eight fertility terms!</p>
       <div class="wordsearch-layout">
         <div class="wordsearch-board" id="wordsearchBoard">
           ${ws.grid.map((row, r) =>
@@ -1779,7 +1193,7 @@
           ).join('')}
         </div>
         <div class="wordsearch-list">
-          <div class="wordsearch-list-title">Find these names</div>
+          <div class="wordsearch-list-title">Find these terms</div>
           ${WORDSEARCH_WORDS.map(item => `
             <div class="wordsearch-word${ws.found.some(entry => entry.key === item.key) ? ' is-found' : ''}">${item.label}</div>
           `).join('')}
@@ -1823,7 +1237,7 @@
       ws.found.push({ key: match.key, cells: line });
       gameState.feedback = null;
       if (ws.found.length >= WORDSEARCH_WORDS.length) {
-        gameState.feedback = { type: 'success', text: `🎉 All names found! ${formatScore(sectionPointsRemaining('wordsearch'))} pts.` };
+        gameState.feedback = { type: 'success', text: `🎉 All terms found! ${formatScore(sectionPointsRemaining('wordsearch'))} pts.` };
         renderWordSearch();
         const sectionIndex = gameState.currentGame;
         setTimeout(() => {
@@ -1845,11 +1259,372 @@
     }, 900);
   }
 
+  // ======== GAME 2: FERTILITY CROSSWORD ========
+  function crosswordWordCells(word) {
+    const [dr, dc] = word.dir === 'across' ? [0, 1] : [1, 0];
+    return [...word.answer].map((_, i) => ({ r: word.row + dr * i, c: word.col + dc * i }));
+  }
+
+  function crosswordCellLocked(cw, key) {
+    const cell = CROSSWORD_LAYOUT.cells[key];
+    return !!cell && cell.words.some(wi => cw.solvedWords.includes(wi));
+  }
+
+  function renderCrossword(focusKey) {
+    const cw = gameState.crossword;
+    const { cells, numbers, words } = CROSSWORD_LAYOUT;
+    const solvedCount = cw.solvedWords.length;
+    const clueItem = (w, wi) => `
+      <button type="button" class="crossword-clue${cw.activeWord === wi ? ' is-active' : ''}${cw.solvedWords.includes(wi) ? ' is-solved' : ''}" data-cw-clue="${wi}">
+        <span class="crossword-clue-num">${w.number}</span>
+        <span class="crossword-clue-text">${escapeHtml(w.clue)} <span class="crossword-clue-len">(${w.answer.length})</span></span>
+      </button>`;
+    const across = words.map((w, wi) => [w, wi]).filter(([w]) => w.dir === 'across');
+    const down = words.map((w, wi) => [w, wi]).filter(([w]) => w.dir === 'down');
+
+    let gridHtml = '';
+    for (let r = 0; r < CROSSWORD_SIZE; r++) {
+      for (let c = 0; c < CROSSWORD_SIZE; c++) {
+        const key = `${r},${c}`;
+        if (!cells[key]) {
+          gridHtml += '<div class="crossword-cell is-block" aria-hidden="true"></div>';
+          continue;
+        }
+        const locked = crosswordCellLocked(cw, key);
+        const wrong = cw.wrongCells.includes(key);
+        gridHtml += `<div class="crossword-cell${locked ? ' is-solved' : ''}${wrong ? ' is-wrong' : ''}" data-cw-wrap="${key}">
+          ${numbers[key] ? `<span class="crossword-num">${numbers[key]}</span>` : ''}
+          <input class="crossword-input" type="text" inputmode="text" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="1"
+            data-cw-key="${key}" value="${escapeHtml(cw.entries[key] || '')}" ${locked ? 'readonly' : ''} aria-label="Row ${r + 1}, column ${c + 1}">
+        </div>`;
+      }
+    }
+
+    app.innerHTML = gameHeader(currentGameNum(), GAME_TITLES.crossword, `${solvedCount} of ${words.length} words solved`) +
+      (gameState.feedback ? `<div class="feedback ${gameState.feedback.type}">${gameState.feedback.text}</div>` : '') +
+      `<p class="instruction">Click a clue or a square and type your answer. Press <strong>Check Answers</strong> to lock in correct words. Each check with a wrong word costs ${WRONG_PENALTY} pts.</p>
+      <div class="crossword-layout">
+        <div class="crossword-board-wrap">
+          <div class="crossword-board" style="--cw-size:${CROSSWORD_SIZE}">${gridHtml}</div>
+          <button type="button" class="btn-primary crossword-check" id="crosswordCheck">Check Answers</button>
+        </div>
+        <div class="crossword-clues">
+          <div class="crossword-clue-group">
+            <div class="crossword-clues-title">Across</div>
+            ${across.map(([w, wi]) => clueItem(w, wi)).join('')}
+          </div>
+          <div class="crossword-clue-group">
+            <div class="crossword-clues-title">Down</div>
+            ${down.map(([w, wi]) => clueItem(w, wi)).join('')}
+          </div>
+        </div>
+      </div>` + gameFooter();
+
+    document.querySelectorAll('[data-cw-key]').forEach(input => {
+      input.addEventListener('mousedown', () => {
+        // Clicking the already-focused square toggles across/down where two words cross.
+        if (document.activeElement === input) toggleCrosswordDirection(input.dataset.cwKey);
+      });
+      input.addEventListener('focus', () => onCrosswordFocus(input.dataset.cwKey));
+      input.addEventListener('input', () => onCrosswordInput(input));
+      input.addEventListener('keydown', e => onCrosswordKeydown(e, input));
+    });
+    document.querySelectorAll('[data-cw-clue]').forEach(btn => {
+      btn.addEventListener('click', () => focusCrosswordWord(Number(btn.dataset.cwClue)));
+    });
+    document.getElementById('crosswordCheck').addEventListener('click', checkCrossword);
+
+    updateCrosswordHighlight();
+    if (focusKey) {
+      const el = document.querySelector(`[data-cw-key="${focusKey}"]`);
+      if (el) el.focus({ preventScroll: true });
+    }
+  }
+
+  function updateCrosswordHighlight() {
+    const cw = gameState.crossword;
+    const word = CROSSWORD_LAYOUT.words[cw.activeWord];
+    const activeKeys = word ? crosswordWordCells(word).map(p => `${p.r},${p.c}`) : [];
+    document.querySelectorAll('[data-cw-wrap]').forEach(el => {
+      el.classList.toggle('is-active', activeKeys.includes(el.dataset.cwWrap));
+    });
+    document.querySelectorAll('[data-cw-clue]').forEach(el => {
+      el.classList.toggle('is-active', Number(el.dataset.cwClue) === cw.activeWord);
+    });
+  }
+
+  function onCrosswordFocus(key) {
+    const cw = gameState.crossword;
+    const cellWords = CROSSWORD_LAYOUT.cells[key]?.words || [];
+    if (!cellWords.includes(cw.activeWord)) {
+      cw.activeWord = cellWords.find(wi => !cw.solvedWords.includes(wi)) ?? cellWords[0];
+    }
+    updateCrosswordHighlight();
+  }
+
+  function toggleCrosswordDirection(key) {
+    const cw = gameState.crossword;
+    const cellWords = CROSSWORD_LAYOUT.cells[key]?.words || [];
+    if (cellWords.length < 2) return;
+    cw.activeWord = cellWords.find(wi => wi !== cw.activeWord);
+    updateCrosswordHighlight();
+  }
+
+  function focusCrosswordWord(wi) {
+    const cw = gameState.crossword;
+    cw.activeWord = wi;
+    const cellsInWord = crosswordWordCells(CROSSWORD_LAYOUT.words[wi]).map(p => `${p.r},${p.c}`);
+    const target = cellsInWord.find(k => !cw.entries[k] && !crosswordCellLocked(cw, k)) || cellsInWord[0];
+    const el = document.querySelector(`[data-cw-key="${target}"]`);
+    if (el) el.focus();
+    updateCrosswordHighlight();
+  }
+
+  function moveCrosswordFocus(fromKey, step) {
+    const cw = gameState.crossword;
+    const word = CROSSWORD_LAYOUT.words[cw.activeWord];
+    if (!word) return;
+    const keys = crosswordWordCells(word).map(p => `${p.r},${p.c}`);
+    let idx = keys.indexOf(fromKey);
+    if (idx === -1) return;
+    // Skip over squares already locked by a solved crossing word.
+    do { idx += step; } while (idx >= 0 && idx < keys.length && crosswordCellLocked(cw, keys[idx]));
+    if (idx < 0 || idx >= keys.length) return;
+    const el = document.querySelector(`[data-cw-key="${keys[idx]}"]`);
+    if (el) el.focus();
+  }
+
+  function clearCrosswordWrongMark(key) {
+    const cw = gameState.crossword;
+    if (!cw.wrongCells.includes(key)) return;
+    cw.wrongCells = cw.wrongCells.filter(k => k !== key);
+    document.querySelector(`[data-cw-wrap="${key}"]`)?.classList.remove('is-wrong');
+  }
+
+  function onCrosswordInput(input) {
+    const cw = gameState.crossword;
+    const key = input.dataset.cwKey;
+    const letter = (input.value.toUpperCase().match(/[A-Z]/g) || []).pop() || '';
+    input.value = letter;
+    if (letter) cw.entries[key] = letter;
+    else delete cw.entries[key];
+    clearCrosswordWrongMark(key);
+    if (letter) moveCrosswordFocus(key, 1);
+  }
+
+  function onCrosswordKeydown(e, input) {
+    const key = input.dataset.cwKey;
+    const cw = gameState.crossword;
+    if (e.key === 'Backspace' && !input.value) {
+      e.preventDefault();
+      moveCrosswordFocus(key, -1);
+      return;
+    }
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      checkCrossword();
+      return;
+    }
+    const arrows = { ArrowRight: [0, 1], ArrowLeft: [0, -1], ArrowDown: [1, 0], ArrowUp: [-1, 0] };
+    if (arrows[e.key]) {
+      e.preventDefault();
+      const [r, c] = key.split(',').map(Number);
+      const [dr, dc] = arrows[e.key];
+      const nextKey = `${r + dr},${c + dc}`;
+      const cellWords = CROSSWORD_LAYOUT.cells[nextKey]?.words;
+      if (!cellWords) return;
+      const wantDir = dr === 0 ? 'across' : 'down';
+      const match = cellWords.find(wi => CROSSWORD_LAYOUT.words[wi].dir === wantDir);
+      if (match !== undefined) cw.activeWord = match;
+      document.querySelector(`[data-cw-key="${nextKey}"]`)?.focus();
+    }
+  }
+
+  function checkCrossword() {
+    const cw = gameState.crossword;
+    const sectionIndex = gameState.currentGame;
+    const focusKey = document.activeElement?.dataset?.cwKey;
+    let newlySolved = 0;
+    let wrongWords = 0;
+    const wrongCells = new Set();
+
+    CROSSWORD_LAYOUT.words.forEach((word, wi) => {
+      if (cw.solvedWords.includes(wi)) return;
+      const keys = crosswordWordCells(word).map(p => `${p.r},${p.c}`);
+      if (!keys.every(k => cw.entries[k])) return; // only judge fully filled words
+      const guess = keys.map(k => cw.entries[k]).join('');
+      if (guess === word.answer) {
+        cw.solvedWords.push(wi);
+        newlySolved++;
+      } else {
+        wrongWords++;
+        keys.forEach((k, i) => { if (cw.entries[k] !== word.answer[i]) wrongCells.add(k); });
+      }
+    });
+    cw.wrongCells = [...wrongCells];
+
+    if (cw.solvedWords.length >= CROSSWORD_LAYOUT.words.length) {
+      gameState.feedback = { type: 'success', text: `🎉 Crossword complete! ${formatScore(sectionPointsRemaining('crossword'))} pts.` };
+      renderCrossword();
+      setTimeout(() => {
+        if (gameState?.currentGame === sectionIndex) advanceGame('solved');
+      }, 900);
+      return;
+    }
+
+    if (wrongWords > 0) {
+      applyWrongPenalty('crossword');
+      const base = wrongAnswerFeedback('crossword');
+      gameState.feedback = {
+        type: 'error',
+        text: `${wrongWords} word${wrongWords !== 1 ? 's' : ''} incorrect${newlySolved ? `, ${newlySolved} correct` : ''}. ${base.text}`,
+      };
+    } else if (newlySolved > 0) {
+      gameState.feedback = { type: 'success', text: `✅ ${newlySolved} word${newlySolved !== 1 ? 's' : ''} correct! Keep going.` };
+    } else {
+      gameState.feedback = { type: 'info', text: 'Fill in at least one complete word, then check.' };
+    }
+    renderCrossword(focusKey && !crosswordCellLocked(cw, focusKey) ? focusKey : null);
+  }
+
+  // ======== GAME 3: SUDOKU ========
+  function sudokuValue(sd, r, c) {
+    return sd.givens[r][c] || sd.entries[`${r},${c}`] || 0;
+  }
+
+  function renderSudoku(focusKey) {
+    const sd = gameState.sudoku;
+    const blanks = sd.givens.flat().filter(v => !v).length;
+    const filled = Object.keys(sd.entries).length;
+
+    let gridHtml = '';
+    for (let r = 0; r < 9; r++) {
+      for (let c = 0; c < 9; c++) {
+        const key = `${r},${c}`;
+        const given = sd.givens[r][c];
+        let cls = 'sudoku-cell';
+        if (c === 2 || c === 5) cls += ' box-right';
+        if (r === 2 || r === 5) cls += ' box-bottom';
+        if (given) cls += ' is-given';
+        if (sd.wrongCells.includes(key)) cls += ' is-wrong';
+        gridHtml += `<div class="${cls}" data-sd-wrap="${key}">${given
+          ? `<span class="sudoku-given">${given}</span>`
+          : `<input class="sudoku-input" type="text" inputmode="numeric" autocomplete="off" maxlength="1"
+              data-sd-key="${key}" value="${sd.entries[key] || ''}" aria-label="Row ${r + 1}, column ${c + 1}">`
+        }</div>`;
+      }
+    }
+
+    app.innerHTML = gameHeader(currentGameNum(), GAME_TITLES.sudoku, `${filled} of ${blanks} squares filled`) +
+      (gameState.feedback ? `<div class="feedback ${gameState.feedback.type}">${gameState.feedback.text}</div>` : '') +
+      `<p class="instruction">Fill every empty square with a number from 1 to 9 so each row, column and 3×3 box contains every number once. Press <strong>Check Answers</strong> when done. Each check with clashing numbers costs ${WRONG_PENALTY} pts.</p>
+      <div class="sudoku-wrap">
+        <div class="sudoku-board">${gridHtml}</div>
+        <button type="button" class="btn-primary crossword-check" id="sudokuCheck">Check Answers</button>
+      </div>` + gameFooter();
+
+    document.querySelectorAll('[data-sd-key]').forEach(input => {
+      input.addEventListener('focus', () => highlightSudokuPeers(input.dataset.sdKey));
+      input.addEventListener('input', () => onSudokuInput(input));
+      input.addEventListener('keydown', e => onSudokuKeydown(e, input));
+    });
+    document.getElementById('sudokuCheck').addEventListener('click', checkSudoku);
+
+    if (focusKey) document.querySelector(`[data-sd-key="${focusKey}"]`)?.focus({ preventScroll: true });
+  }
+
+  function highlightSudokuPeers(key) {
+    const [r, c] = key.split(',').map(Number);
+    const box = Math.floor(r / 3) * 3 + Math.floor(c / 3);
+    document.querySelectorAll('[data-sd-wrap]').forEach(el => {
+      const [er, ec] = el.dataset.sdWrap.split(',').map(Number);
+      const peer = er === r || ec === c || Math.floor(er / 3) * 3 + Math.floor(ec / 3) === box;
+      el.classList.toggle('is-peer', peer);
+    });
+  }
+
+  function onSudokuInput(input) {
+    const sd = gameState.sudoku;
+    const key = input.dataset.sdKey;
+    const digit = (input.value.match(/[1-9]/g) || []).pop() || '';
+    input.value = digit;
+    if (digit) sd.entries[key] = Number(digit);
+    else delete sd.entries[key];
+    if (sd.wrongCells.includes(key)) {
+      sd.wrongCells = sd.wrongCells.filter(k => k !== key);
+      document.querySelector(`[data-sd-wrap="${key}"]`)?.classList.remove('is-wrong');
+    }
+  }
+
+  function onSudokuKeydown(e, input) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      checkSudoku();
+      return;
+    }
+    const arrows = { ArrowRight: [0, 1], ArrowLeft: [0, -1], ArrowDown: [1, 0], ArrowUp: [-1, 0] };
+    if (!arrows[e.key]) return;
+    e.preventDefault();
+    const [dr, dc] = arrows[e.key];
+    let [r, c] = input.dataset.sdKey.split(',').map(Number);
+    // Jump over given squares to the next editable one in that direction.
+    do { r += dr; c += dc; } while (r >= 0 && r < 9 && c >= 0 && c < 9 && gameState.sudoku.givens[r][c]);
+    if (r < 0 || r > 8 || c < 0 || c > 8) return;
+    document.querySelector(`[data-sd-key="${r},${c}"]`)?.focus();
+  }
+
+  function checkSudoku() {
+    const sd = gameState.sudoku;
+    const sectionIndex = gameState.currentGame;
+    const focusKey = document.activeElement?.dataset?.sdKey;
+
+    const units = [];
+    for (let i = 0; i < 9; i++) {
+      units.push([...Array(9).keys()].map(j => [i, j]));           // row
+      units.push([...Array(9).keys()].map(j => [j, i]));           // column
+      const br = Math.floor(i / 3) * 3, bc = (i % 3) * 3;
+      units.push([...Array(9).keys()].map(j => [br + Math.floor(j / 3), bc + (j % 3)])); // box
+    }
+    const wrong = new Set();
+    units.forEach(unit => {
+      const byDigit = {};
+      unit.forEach(([r, c]) => {
+        const v = sudokuValue(sd, r, c);
+        if (v) (byDigit[v] = byDigit[v] || []).push([r, c]);
+      });
+      Object.values(byDigit).forEach(cells => {
+        if (cells.length < 2) return;
+        // Only the player's own squares are marked; givens are never wrong.
+        cells.forEach(([r, c]) => { if (!sd.givens[r][c]) wrong.add(`${r},${c}`); });
+      });
+    });
+    sd.wrongCells = [...wrong];
+
+    const remaining = sd.givens.flat().filter(v => !v).length - Object.keys(sd.entries).length;
+
+    if (wrong.size > 0) {
+      applyWrongPenalty('sudoku');
+      const base = wrongAnswerFeedback('sudoku');
+      gameState.feedback = {
+        type: 'error',
+        text: `${wrong.size} square${wrong.size !== 1 ? 's' : ''} clash with another number. ${base.text}`,
+      };
+    } else if (remaining > 0) {
+      gameState.feedback = { type: 'info', text: `No clashes so far. ${remaining} square${remaining !== 1 ? 's' : ''} left to fill.` };
+    } else {
+      gameState.feedback = { type: 'success', text: `🎉 Sudoku solved! ${formatScore(sectionPointsRemaining('sudoku'))} pts.` };
+      renderSudoku();
+      setTimeout(() => {
+        if (gameState?.currentGame === sectionIndex) advanceGame('solved');
+      }, 900);
+      return;
+    }
+    renderSudoku(focusKey);
+  }
+
   // ======== END GAME ========
   function endGame(status) {
     clearInterval(gameState.timerInterval);
-    stopRunnerLoop();
-    document.removeEventListener('keydown', handleMazeKey);
     const timeTaken = TOTAL_TIME - gameState.timeRemaining;
 
     if ((status === 'Timeout' || status === 'Event Ended') && gameState.currentGame < GAME_COUNT) {
@@ -1883,17 +1658,8 @@
     const scores = bd.scores || gameState.sectionScores || {};
     const totalScore = bd.totalScore ?? gameState.totalScore ?? 0;
     const scorePct = Math.min(100, Math.max(0, (totalScore / MAX_SCORE) * 100));
-    const labels = {
-      spot: 'Shammi Kapoor Puzzle',
-      jumble: 'Guess the Movie',
-      maze: 'Bollywood Maze',
-      guess: 'Guess the Actress',
-      runner: 'Bollywood Star Runner',
-      memory: 'Bollywood Memory Cards',
-      tictactoe: 'Bollywood Tic-Tac-Toe',
-      wordsearch: 'Bollywood Word Search',
-    };
-    const icons = { spot: '🧩', jumble: '🎬', maze: '🗺️', guess: '⭐', runner: '🏃', memory: '🃏', tictactoe: '❌', wordsearch: '🔍' };
+    const labels = GAME_TITLES;
+    const icons = Object.fromEntries(GAME_STEPS.map(step => [step.id, step.icon]));
     const statusLabels = {
       solved: { cls: 'solved', text: 'Solved' },
       submitted: { cls: 'skipped', text: 'Submitted' },
@@ -2202,8 +1968,6 @@
       if (pwd === 'Admin@1064') {
         close();
         if (gameState && gameState.timerInterval) clearInterval(gameState.timerInterval);
-        stopRunnerLoop();
-        document.removeEventListener('keydown', handleMazeKey);
         renderAdmin();
       } else {
         err.style.display = 'block';
