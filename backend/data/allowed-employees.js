@@ -239,4 +239,8 @@ export const ALLOWED_EMPLOYEES = [
   { empId: 'IIHPL05355', empName: 'Mohd. Shakeel', empStatus: 'ACTIVE' },
   { empId: 'IIHL10072', empName: 'Mohd. Pasha Ahmed', empStatus: 'ACTIVE' },
   { empId: 'IIHL10273', empName: 'Ganesh Kadave', empStatus: 'ACTIVE' },
+  // Franchise KAMs
+  { empId: 'IIHL10973', empName: 'Irfan Hussain', empStatus: 'ACTIVE' },
+  { empId: 'IIHL10807', empName: 'Aman Jain', empStatus: 'ACTIVE' },
+  { empId: 'IIHL10730', empName: 'Aman Kumar', empStatus: 'ACTIVE' },
 ];

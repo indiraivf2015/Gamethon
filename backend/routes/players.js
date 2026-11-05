@@ -8,6 +8,9 @@ import {
 import { normalizeEmpId, validateAllowedEmployee, lookupAllowedEmployee } from '../seedAllowedEmployees.js';
 import { isTestEmployee } from '../testUsers.js';
 
+/** Keep in sync with POINTS_PER_SECTION × SECTION_IDS in frontend/index.html (2 games × 50 pts). */
+const MAX_SCORE = 150;
+
 const router = Router();
 
 function rowToPlayer(row) {
@@ -40,7 +43,7 @@ function respondAlreadyPlayed(res, row) {
   const player = rowToPlayer(row);
   const score = player.breakdown?.totalScore ?? 0;
   return res.status(403).json({
-    error: `You have already completed the Gamethon (score: ${score}/160). Each employee can play only once.`,
+    error: `You have already completed the Gamethon (score: ${score}/${MAX_SCORE}). Each employee can play only once.`,
     code: 'ALREADY_PLAYED',
     score,
     status: player.status,
@@ -133,11 +136,9 @@ router.post('/login', async (req, res) => {
   const sessionId = Date.now();
   const sessionExpiresAt = sessionExpiresAtForLogin(sessionId, { testUser });
   const breakdown = {
-    spot: 'pending',
-    jumble: 'pending',
-    match: 'pending',
-    guess: 'pending',
-    eye: 'pending',
+    wordsearch: 'pending',
+    crossword: 'pending',
+    sudoku: 'pending',
   };
 
   try {
